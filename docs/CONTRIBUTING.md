@@ -24,7 +24,7 @@ By participating in this project, you agree to abide by our [Code of Conduct](CO
 1. **Fork** the repository on GitHub
 2. **Clone** your fork locally
    ```bash
-   git clone https://github.com/your-username/text2iac.git
+   git clone https://github.com/devopsterminal/text2iac.git
    cd text2iac
    ```
 3. **Set up** the development environment
@@ -143,7 +143,7 @@ Good documentation is crucial for the success of any open-source project. We enc
 
 ## License
 
-By contributing to this project, you agree that your contributions will be licensed under its [MIT License](LICENSE).
+By contributing to this project, you agree that your contributions will be licensed under its [ApacheLicense](LICENSE).
 
 ## Thank You!
 
