@@ -1,0 +1,407 @@
+{
+  "welcome": {
+    "subject": "Welcome to Text2IaC Platform!",
+    "body": "templates/emails/welcome_body.html",
+    "subject_template": "templates/emails/welcome_subject.txt"
+  },
+  "password_reset": {
+    "subject": "Reset Your Text2IaC Password",
+    "body": "templates/emails/password_reset_body.html",
+    "subject_template": "templates/emails/password_reset_subject.txt"
+  },
+  "notification": {
+    "subject": "Notification from Text2IaC",
+    "body": "templates/emails/notification_body.html",
+    "subject_template": "templates/emails/notification_subject.txt"
+  },
+  "infra_request_received": {
+    "subject": "Your Infrastructure Request Has Been Received",
+    "body": "templates/emails/infra_request_received_body.html",
+    "subject_template": "templates/emails/infra_request_received_subject.txt"
+  },
+  "infra_request_processed": {
+    "subject": "Your Infrastructure Request Has Been Processed",
+    "body": "templates/emails/infra_request_processed_body.html",
+    "subject_template": "templates/emails/infra_request_processed_subject.txt"
+  },
+  "infra_request_failed": {
+    "subject": "Issue with Your Infrastructure Request",
+    "body": "templates/emails/infra_request_failed_body.html",
+    "subject_template": "templates/emails/infra_request_failed_subject.txt"
+  },
+  "error_notification": {
+    "subject": "Error Processing Your Request",
+    "body": "templates/emails/error_notification_body.html",
+    "subject_template": "templates/emails/error_notification_subject.txt"
+  },
+  "daily_digest": {
+    "subject": "Your Daily Text2IaC Digest",
+    "body": "templates/emails/daily_digest_body.html",
+    "subject_template": "templates/emails/daily_digest_subject.txt"
+  },
+  "weekly_report": {
+    "subject": "Your Weekly Text2IaC Report",
+    "body": "templates/emails/weekly_report_body.html",
+    "subject_template": "templates/emails/weekly_report_subject.txt"
+  },
+  "account_verification": {
+    "subject": "Verify Your Email Address",
+    "body": "templates/emails/account_verification_body.html",
+    "subject_template": "templates/emails/account_verification_subject.txt"
+  },
+  "trial_ending": {
+    "subject": "Your Trial Is Ending Soon",
+    "body": "templates/emails/trial_ending_body.html",
+    "subject_template": "templates/emails/trial_ending_subject.txt"
+  },
+  "payment_receipt": {
+    "subject": "Payment Receipt for Your Text2IaC Subscription",
+    "body": "templates/emails/payment_receipt_body.html",
+    "subject_template": "templates/emails/payment_receipt_subject.txt"
+  },
+  "account_upgrade": {
+    "subject": "Your Account Has Been Upgraded",
+    "body": "templates/emails/account_upgrade_body.html",
+    "subject_template": "templates/emails/account_upgrade_subject.txt"
+  },
+  "account_downgrade": {
+    "subject": "Your Account Has Been Downgraded",
+    "body": "templates/emails/account_downgrade_body.html",
+    "subject_template": "templates/emails/account_downgrade_subject.txt"
+  },
+  "system_alert": {
+    "subject": "System Alert: Action Required",
+    "body": "templates/emails/system_alert_body.html",
+    "subject_template": "templates/emails/system_alert_subject.txt"
+  },
+  "maintenance_notice": {
+    "subject": "Scheduled Maintenance Notice",
+    "body": "templates/emails/maintenance_notice_body.html",
+    "subject_template": "templates/emails/maintenance_notice_subject.txt"
+  },
+  "new_login": {
+    "subject": "New Login Detected",
+    "body": "templates/emails/new_login_body.html",
+    "subject_template": "templates/emails/new_login_subject.txt"
+  },
+  "password_changed": {
+    "subject": "Your Password Has Been Changed",
+    "body": "templates/emails/password_changed_body.html",
+    "subject_template": "templates/emails/password_changed_subject.txt"
+  },
+  "two_factor_auth": {
+    "subject": "Your Two-Factor Authentication Code",
+    "body": "templates/emails/two_factor_auth_body.html",
+    "subject_template": "templates/emails/two_factor_auth_subject.txt"
+  },
+  "account_locked": {
+    "subject": "Your Account Has Been Locked",
+    "body": "templates/emails/account_locked_body.html",
+    "subject_template": "templates/emails/account_locked_subject.txt"
+  },
+  "account_unlocked": {
+    "subject": "Your Account Has Been Unlocked",
+    "body": "templates/emails/account_unlocked_body.html",
+    "subject_template": "templates/emails/account_unlocked_subject.txt"
+  },
+  "contact_form_submission": {
+    "subject": "New Contact Form Submission",
+    "body": "templates/emails/contact_form_submission_body.html",
+    "subject_template": "templates/emails/contact_form_submission_subject.txt"
+  },
+  "feedback_received": {
+    "subject": "Thank You for Your Feedback",
+    "body": "templates/emails/feedback_received_body.html",
+    "subject_template": "templates/emails/feedback_received_subject.txt"
+  },
+  "referral_invitation": {
+    "subject": "You've Been Invited to Join Text2IaC",
+    "body": "templates/emails/referral_invitation_body.html",
+    "subject_template": "templates/emails/referral_invitation_subject.txt"
+  },
+  "referral_reward": {
+    "subject": "You've Earned a Reward!",
+    "body": "templates/emails/referral_reward_body.html",
+    "subject_template": "templates/emails/referral_reward_subject.txt"
+  },
+  "ticket_created": {
+    "subject": "Your Support Ticket Has Been Created",
+    "body": "templates/emails/ticket_created_body.html",
+    "subject_template": "templates/emails/ticket_created_subject.txt"
+  },
+  "ticket_updated": {
+    "subject": "Your Support Ticket Has Been Updated",
+    "body": "templates/emails/ticket_updated_body.html",
+    "subject_template": "templates/emails/ticket_updated_subject.txt"
+  },
+  "ticket_resolved": {
+    "subject": "Your Support Ticket Has Been Resolved",
+    "body": "templates/emails/ticket_resolved_body.html",
+    "subject_template": "templates/emails/ticket_resolved_subject.txt"
+  },
+  "ticket_feedback": {
+    "subject": "How Did We Do?",
+    "body": "templates/emails/ticket_feedback_body.html",
+    "subject_template": "templates/emails/ticket_feedback_subject.txt"
+  },
+  "api_key_created": {
+    "subject": "New API Key Created",
+    "body": "templates/emails/api_key_created_body.html",
+    "subject_template": "templates/emails/api_key_created_subject.txt"
+  },
+  "api_key_revoked": {
+    "subject": "API Key Revoked",
+    "body": "templates/emails/api_key_revoked_body.html",
+    "subject_template": "templates/emails/api_key_revoked_subject.txt"
+  },
+  "rate_limit_exceeded": {
+    "subject": "API Rate Limit Exceeded",
+    "body": "templates/emails/rate_limit_exceeded_body.html",
+    "subject_template": "templates/emails/rate_limit_exceeded_subject.txt"
+  },
+  "suspicious_activity": {
+    "subject": "Suspicious Activity Detected",
+    "body": "templates/emails/suspicious_activity_body.html",
+    "subject_template": "templates/emails/suspicious_activity_subject.txt"
+  },
+  "data_export_ready": {
+    "subject": "Your Data Export Is Ready",
+    "body": "templates/emails/data_export_ready_body.html",
+    "subject_template": "templates/emails/data_export_ready_subject.txt"
+  },
+  "data_import_complete": {
+    "subject": "Your Data Import Is Complete",
+    "body": "templates/emails/data_import_complete_body.html",
+    "subject_template": "templates/emails/data_import_complete_subject.txt"
+  },
+  "data_import_failed": {
+    "subject": "Data Import Failed",
+    "body": "templates/emails/data_import_failed_body.html",
+    "subject_template": "templates/emails/data_import_failed_subject.txt"
+  },
+  "billing_failed": {
+    "subject": "Payment Failed - Update Your Billing Information",
+    "body": "templates/emails/billing_failed_body.html",
+    "subject_template": "templates/emails/billing_failed_subject.txt"
+  },
+  "billing_success": {
+    "subject": "Payment Received - Thank You!",
+    "body": "templates/emails/billing_success_body.html",
+    "subject_template": "templates/emails/billing_success_subject.txt"
+  },
+  "billing_receipt": {
+    "subject": "Your Receipt for Text2IaC Services",
+    "body": "templates/emails/billing_receipt_body.html",
+    "subject_template": "templates/emails/billing_receipt_subject.txt"
+  },
+  "billing_invoice": {
+    "subject": "Your Text2IaC Invoice is Ready",
+    "body": "templates/emails/billing_invoice_body.html",
+    "subject_template": "templates/emails/billing_invoice_subject.txt"
+  },
+  "billing_upcoming_charge": {
+    "subject": "Upcoming Charge for Your Text2IaC Subscription",
+    "body": "templates/emails/billing_upcoming_charge_body.html",
+    "subject_template": "templates/emails/billing_upcoming_charge_subject.txt"
+  },
+  "billing_subscription_ending": {
+    "subject": "Your Subscription Is Ending Soon",
+    "body": "templates/emails/billing_subscription_ending_body.html",
+    "subject_template": "templates/emails/billing_subscription_ending_subject.txt"
+  },
+  "billing_subscription_cancelled": {
+    "subject": "Your Subscription Has Been Cancelled",
+    "body": "templates/emails/billing_subscription_cancelled_body.html",
+    "subject_template": "templates/emails/billing_subscription_cancelled_subject.txt"
+  },
+  "billing_subscription_reactivated": {
+    "subject": "Your Subscription Has Been Reactivated",
+    "body": "templates/emails/billing_subscription_reactivated_body.html",
+    "subject_template": "templates/emails/billing_subscription_reactivated_subject.txt"
+  },
+  "billing_subscription_updated": {
+    "subject": "Your Subscription Has Been Updated",
+    "body": "templates/emails/billing_subscription_updated_body.html",
+    "subject_template": "templates/emails/billing_subscription_updated_subject.txt"
+  },
+  "billing_subscription_past_due": {
+    "subject": "Your Subscription Payment Is Past Due",
+    "body": "templates/emails/billing_subscription_past_due_body.html",
+    "subject_template": "templates/emails/billing_subscription_past_due_subject.txt"
+  },
+  "billing_subscription_trial_ending": {
+    "subject": "Your Free Trial Is Ending Soon",
+    "body": "templates/emails/billing_subscription_trial_ending_body.html",
+    "subject_template": "templates/emails/billing_subscription_trial_ending_subject.txt"
+  },
+  "billing_subscription_trial_ended": {
+    "subject": "Your Free Trial Has Ended",
+    "body": "templates/emails/billing_subscription_trial_ended_body.html",
+    "subject_template": "templates/emails/billing_subscription_trial_ended_subject.txt"
+  },
+  "billing_subscription_charge_succeeded": {
+    "subject": "Your Subscription Payment Was Successful",
+    "body": "templates/emails/billing_subscription_charge_succeeded_body.html",
+    "subject_template": "templates/emails/billing_subscription_charge_succeeded_subject.txt"
+  },
+  "billing_subscription_charge_failed": {
+    "subject": "Your Subscription Payment Failed",
+    "body": "templates/emails/billing_subscription_charge_failed_body.html",
+    "subject_template": "templates/emails/billing_subscription_charge_failed_subject.txt"
+  },
+  "billing_invoice_payment_succeeded": {
+    "subject": "Your Payment Was Successful",
+    "body": "templates/emails/billing_invoice_payment_succeeded_body.html",
+    "subject_template": "templates/emails/billing_invoice_payment_succeeded_subject.txt"
+  },
+  "billing_invoice_payment_failed": {
+    "subject": "Your Payment Failed",
+    "body": "templates/emails/billing_invoice_payment_failed_body.html",
+    "subject_template": "templates/emails/billing_invoice_payment_failed_subject.txt"
+  },
+  "billing_invoice_upcoming": {
+    "subject": "Your Upcoming Invoice",
+    "body": "templates/emails/billing_invoice_upcoming_body.html",
+    "subject_template": "templates/emails/billing_invoice_upcoming_subject.txt"
+  },
+  "billing_invoice_final": {
+    "subject": "Your Final Invoice",
+    "body": "templates/emails/billing_invoice_final_body.html",
+    "subject_template": "templates/emails/billing_invoice_final_subject.txt"
+  },
+  "billing_invoice_payment_succeeded_customer": {
+    "subject": "Your Payment Was Received",
+    "body": "templates/emails/billing_invoice_payment_succeeded_customer_body.html",
+    "subject_template": "templates/emails/billing_invoice_payment_succeeded_customer_subject.txt"
+  },
+  "billing_invoice_payment_failed_customer": {
+    "subject": "Your Payment Failed",
+    "body": "templates/emails/billing_invoice_payment_failed_customer_body.html",
+    "subject_template": "templates/emails/billing_invoice_payment_failed_customer_subject.txt"
+  },
+  "billing_invoice_upcoming_customer": {
+    "subject": "Your Upcoming Invoice",
+    "body": "templates/emails/billing_invoice_upcoming_customer_body.html",
+    "subject_template": "templates/emails/billing_invoice_upcoming_customer_subject.txt"
+  },
+  "billing_invoice_final_customer": {
+    "subject": "Your Final Invoice",
+    "body": "templates/emails/billing_invoice_final_customer_body.html",
+    "subject_template": "templates/emails/billing_invoice_final_customer_subject.txt"
+  },
+  "billing_subscription_trial_will_end": {
+    "subject": "Your Free Trial Is Ending Soon",
+    "body": "templates/emails/billing_subscription_trial_will_end_body.html",
+    "subject_template": "templates/emails/billing_subscription_trial_will_end_subject.txt"
+  },
+  "billing_subscription_trial_ended_customer": {
+    "subject": "Your Free Trial Has Ended",
+    "body": "templates/emails/billing_subscription_trial_ended_customer_body.html",
+    "subject_template": "templates/emails/billing_subscription_trial_ended_customer_subject.txt"
+  },
+  "billing_subscription_created": {
+    "subject": "Your Subscription Is Active",
+    "body": "templates/emails/billing_subscription_created_body.html",
+    "subject_template": "templates/emails/billing_subscription_created_subject.txt"
+  },
+  "billing_subscription_updated_customer": {
+    "subject": "Your Subscription Has Been Updated",
+    "body": "templates/emails/billing_subscription_updated_customer_body.html",
+    "subject_template": "templates/emails/billing_subscription_updated_customer_subject.txt"
+  },
+  "billing_subscription_cancelled_customer": {
+    "subject": "Your Subscription Has Been Cancelled",
+    "body": "templates/emails/billing_subscription_cancelled_customer_body.html",
+    "subject_template": "templates/emails/billing_subscription_cancelled_customer_subject.txt"
+  },
+  "billing_subscription_reactivated_customer": {
+    "subject": "Your Subscription Has Been Reactivated",
+    "body": "templates/emails/billing_subscription_reactivated_customer_body.html",
+    "subject_template": "templates/emails/billing_subscription_reactivated_customer_subject.txt"
+  },
+  "billing_subscription_past_due_customer": {
+    "subject": "Your Subscription Payment Is Past Due",
+    "body": "templates/emails/billing_subscription_past_due_customer_body.html",
+    "subject_template": "templates/emails/billing_subscription_past_due_customer_subject.txt"
+  },
+  "billing_subscription_trial_ending_customer": {
+    "subject": "Your Free Trial Is Ending Soon",
+    "body": "templates/emails/billing_subscription_trial_ending_customer_body.html",
+    "subject_template": "templates/emails/billing_subscription_trial_ending_customer_subject.txt"
+  },
+  "billing_subscription_charge_succeeded_customer": {
+    "subject": "Your Subscription Payment Was Successful",
+    "body": "templates/emails/billing_subscription_charge_succeeded_customer_body.html",
+    "subject_template": "templates/emails/billing_subscription_charge_succeeded_customer_subject.txt"
+  },
+  "billing_subscription_charge_failed_customer": {
+    "subject": "Your Subscription Payment Failed",
+    "body": "templates/emails/billing_subscription_charge_failed_customer_body.html",
+    "subject_template": "templates/emails/billing_subscription_charge_failed_customer_subject.txt"
+  },
+  "billing_invoice_payment_succeeded_admin": {
+    "subject": "Payment Received from Customer",
+    "body": "templates/emails/billing_invoice_payment_succeeded_admin_body.html",
+    "subject_template": "templates/emails/billing_invoice_payment_succeeded_admin_subject.txt"
+  },
+  "billing_invoice_payment_failed_admin": {
+    "subject": "Payment Failed for Customer",
+    "body": "templates/emails/billing_invoice_payment_failed_admin_body.html",
+    "subject_template": "templates/emails/billing_invoice_payment_failed_admin_subject.txt"
+  },
+  "billing_invoice_upcoming_admin": {
+    "subject": "Upcoming Invoice for Customer",
+    "body": "templates/emails/billing_invoice_upcoming_admin_body.html",
+    "subject_template": "templates/emails/billing_invoice_upcoming_admin_subject.txt"
+  },
+  "billing_invoice_final_admin": {
+    "subject": "Final Invoice for Customer",
+    "body": "templates/emails/billing_invoice_final_admin_body.html",
+    "subject_template": "templates/emails/billing_invoice_final_admin_subject.txt"
+  },
+  "billing_subscription_created_admin": {
+    "subject": "New Subscription Created",
+    "body": "templates/emails/billing_subscription_created_admin_body.html",
+    "subject_template": "templates/emails/billing_subscription_created_admin_subject.txt"
+  },
+  "billing_subscription_updated_admin": {
+    "subject": "Subscription Updated",
+    "body": "templates/emails/billing_subscription_updated_admin_body.html",
+    "subject_template": "templates/emails/billing_subscription_updated_admin_subject.txt"
+  },
+  "billing_subscription_cancelled_admin": {
+    "subject": "Subscription Cancelled",
+    "body": "templates/emails/billing_subscription_cancelled_admin_body.html",
+    "subject_template": "templates/emails/billing_subscription_cancelled_admin_subject.txt"
+  },
+  "billing_subscription_reactivated_admin": {
+    "subject": "Subscription Reactivated",
+    "body": "templates/emails/billing_subscription_reactivated_admin_body.html",
+    "subject_template": "templates/emails/billing_subscription_reactivated_admin_subject.txt"
+  },
+  "billing_subscription_past_due_admin": {
+    "subject": "Subscription Payment Past Due",
+    "body": "templates/emails/billing_subscription_past_due_admin_body.html",
+    "subject_template": "templates/emails/billing_subscription_past_due_admin_subject.txt"
+  },
+  "billing_subscription_trial_ending_admin": {
+    "subject": "Customer Trial Ending Soon",
+    "body": "templates/emails/billing_subscription_trial_ending_admin_body.html",
+    "subject_template": "templates/emails/billing_subscription_trial_ending_admin_subject.txt"
+  },
+  "billing_subscription_trial_ended_admin": {
+    "subject": "Customer Trial Ended",
+    "body": "templates/emails/billing_subscription_trial_ended_admin_body.html",
+    "subject_template": "templates/emails/billing_subscription_trial_ended_admin_subject.txt"
+  },
+  "billing_subscription_charge_succeeded_admin": {
+    "subject": "Subscription Payment Received",
+    "body": "templates/emails/billing_subscription_charge_succeeded_admin_body.html",
+    "subject_template": "templates/emails/billing_subscription_charge_succeeded_admin_subject.txt"
+  },
+  "billing_subscription_charge_failed_admin": {
+    "subject": "Subscription Payment Failed",
+    "body": "templates/emails/billing_subscription_charge_failed_admin_body.html",
+    "subject_template": "templates/emails/billing_subscription_charge_failed_admin_subject.txt"
+  }
+}

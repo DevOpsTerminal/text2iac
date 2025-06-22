@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text2IaC Platform - Generate Infrastructure from Text</title>
+    <link rel="icon" type="image/png" href="/assets/favicon.png">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Custom CSS -->
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .animation-fadeIn {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .typing-effect::after {
+            content: '|';
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .status-processing {
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+        }
+
+        .status-completed {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+        }
+
+        .status-failed {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+                        <span class="text-2xl">🚀</span>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold">Text2IaC Platform</h1>
+                        <p class="text-blue-100 text-sm">Generate infrastructure from plain English</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <div class="glass-effect px-3 py-1 rounded-full text-sm">
+                        <span id="status-indicator" class="inline-block w-2 h-2 bg-green-400 rounded-full mr-2"></span>
+                        <span id="status-text">System Online</span>
+                    </div>
+                    <button onclick="showHelp()" class="glass-effect px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-20 transition-all">
+                        ❓ Help
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Hero Section -->
+        <section class="text-center mb-12 animation-fadeIn">
+            <h2 class="text-4xl font-bold text-gray-800 mb-4">
+                Describe Your Infrastructure in
+                <span class="text-blue-600 typing-effect" id="typewriter">Plain English</span>
+            </h2>
+            <p class="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+                Transform your ideas into production-ready infrastructure.
+                Just describe what you need, and we'll generate Terraform, Kubernetes, Docker Compose, and monitoring setup.
+            </p>
+        </section>
+
+        <!-- Main Form -->
+        <section class="max-w-4xl mx-auto mb-12">
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <form id="infraForm" class="space-y-6">
+                    <!-- Description Input -->
+                    <div>
+                        <label for="description" class="block text-lg font-semibold text-gray-700 mb-3">
+                            🎯 What do you want to build?
+                        </label>
+                        <textarea
+                            id="description"
+                            name="description"
+                            rows="6"
+                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all resize-none"
+                            placeholder="Example: Create a Node.js e-commerce API with PostgreSQL database, Redis cache, payment processing, and auto-scaling for 10,000 users..."
+                            required
+                        ></textarea>
+                        <div class="mt-2 text-sm text-gray-500">
+                            💡 Tip: Be specific about your requirements, expected traffic, and preferred technologies
+                        </div>
+                    </div>
+
+                    <!-- Configuration Options -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label for="environment" class="block text-sm font-medium text-gray-700 mb-2">
+                                🌍 Environment
+                            </label>
+                            <select id="environment" name="environment" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-200">
+                                <option value="development">Development</option>
+                                <option value="staging">Staging</option>
+                                <option value="production">Production</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="priority" class="block text-sm font-medium text-gray-700 mb-2">
+                                ⚡ Priority
+                            </label>
+                            <select id="priority" name="priority" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-200">
+                                <option value="low">Low (Within a week)</option>
+                                <option value="medium">Medium (Within 3 days)</option>
+                                <option value="high">High (Within 24 hours)</option>
+                                <option value="critical">Critical (ASAP)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="cloudProvider" class="block text-sm font-medium text-gray-700 mb-2">
+                                ☁️ Cloud Provider
+                            </label>
+                            <select id="cloudProvider" name="cloudProvider" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-200">
+                                <option value="aws">Amazon AWS</option>
+                                <option value="local">Local/Docker</option>
+                                <option value="azure">Microsoft Azure</option>
+                                <option value="gcp">Google Cloud</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Additional Options -->
+                    <div class="border-t pt-6">
+                        <div class="flex flex-wrap gap-4">
+                            <label class="flex items-center">
+                                <input type="checkbox" id="includeMonitoring" name="includeMonitoring" checked class="rounded text-blue-500 focus:ring-blue-200">
+                                <span class="ml-2 text-sm">📊 Include monitoring (Prometheus/Grafana)</span>
+                            </label>
+
+                            <label class="flex items-center">
+                                <input type="checkbox" id="includeCI" name="includeCI" checked class="rounded text-blue-500 focus:ring-blue-200">
+                                <span class="ml-2 text-sm">🔄 Include CI/CD pipeline</span>
+                            </label>
+
+                            <label class="flex items-center">
+                                <input type="checkbox" id="includeSecurity" name="includeSecurity" checked class="rounded text-blue-500 focus:ring-blue-200">
+                                <span class="ml-2 text-sm">🔒 Include security best practices</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="text-center">
+                        <button
+                            type="submit"
+                            id="generateBtn"
+                            class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:from-blue-600 hover:to-purple-700 focus:ring-4 focus:ring-blue-200 transition-all transform hover:scale-105 shadow-lg"
+                        >
+                            ✨ Generate Infrastructure
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Quick Templates -->
+        <section class="max-w-6xl mx-auto mb-12">
+            <h3 class="text-2xl font-bold text-center text-gray-800 mb-8">🎯 Quick Start Templates</h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Template Cards -->
+                <div class="template-card bg-white rounded-lg shadow-md p-6 card-hover cursor-pointer" onclick="useTemplate('blog')">
+                    <div class="text-4xl mb-4">📝</div>
+                    <h4 class="text-xl font-semibold mb-2">Blog Website</h4>
+                    <p class="text-gray-600 text-sm">WordPress with comments, admin panel, CDN, and backup system</p>
+                </div>
+
+                <div class="template-card bg-white rounded-lg shadow-md p-6 card-hover cursor-pointer" onclick="useTemplate('ecommerce')">
+                    <div class="text-4xl mb-4">🛒</div>
+                    <h4 class="text-xl font-semibold mb-2">E-commerce Store</h4>
+                    <p class="text-gray-600 text-sm">Complete online store with payments, inventory, and analytics</p>
+                </div>
+
+                <div class="template-card bg-white rounded-lg shadow-md p-6 card-hover cursor-pointer" onclick="useTemplate('api')">
+                    <div class="text-4xl mb-4">🔌</div>
+                    <h4 class="text-xl font-semibold mb-2">REST API</h4>
+                    <p class="text-gray-600 text-sm">Scalable API with database, authentication, and monitoring</p>
+                </div>
+
+                <div class="template-card bg-white rounded-lg shadow-md p-6 card-hover cursor-pointer" onclick="useTemplate('mobile')">
+                    <div class="text-4xl mb-4">📱</div>
+                    <h4 class="text-xl font-semibold mb-2">Mobile App Backend</h4>
+                    <p class="text-gray-600 text-sm">Backend for iOS/Android with push notifications and analytics</p>
+                </div>
+
+                <div class="template-card bg-white rounded-lg shadow-md p-6 card-hover cursor-pointer" onclick="useTemplate('analytics')">
+                    <div class="text-4xl mb-4">📊</div>
+                    <h4 class="text-xl font-semibold mb-2">Analytics Platform</h4>
+                    <p class="text-gray-600 text-sm">Data pipeline with real-time processing and dashboards</p>
+                </div>
+
+                <div class="template-card bg-white rounded-lg shadow-md p-6 card-hover cursor-pointer" onclick="useTemplate('ml')">
+                    <div class="text-4xl mb-4">🤖</div>
+                    <h4 class="text-xl font-semibold mb-2">ML Platform</h4>
+                    <p class="text-gray-600 text-sm">Machine learning platform with training and inference</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Result Section -->
+        <section id="resultSection" class="max-w-4xl mx-auto hidden">
+            <div id="resultCard" class="bg-white rounded-xl shadow-lg p-8">
+                <!-- Results will be dynamically inserted here -->
+            </div>
+        </section>
+
+        <!-- Recent Requests -->
+        <section class="max-w-4xl mx-auto">
+            <h3 class="text-2xl font-bold text-gray-800 mb-6">📋 Recent Requests</h3>
+            <div id="recentRequests" class="space-y-4">
+                <!-- Recent requests will be loaded here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Help Modal -->
+    <div id="helpModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-8 max-w-2xl mx-4 max-h-96 overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold">❓ How to Use Text2IaC</h3>
+                <button onclick="hideHelp()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <h4 class="font-semibold text-lg mb-2">📧 Email Integration</h4>
+                    <p class="text-gray-600">Send requests to <code class="bg-gray-100 px-2 py-1 rounded">infrastructure@company.com</code> with <code>[TEXT2IAC]</code> in the subject line.</p>
+                </div>
+
+                <div>
+                    <h4 class="font-semibold text-lg mb-2">✍️ Writing Good Descriptions</h4>
+                    <ul class="list-disc list-inside text-gray-600 space-y-1">
+                        <li>Be specific about your requirements</li>
+                        <li>Mention expected traffic/load</li>
+                        <li>Include preferred technologies</li>
+                        <li>Specify performance requirements</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-semibold text-lg mb-2">🎯 Example Request</h4>
+                    <div class="bg-gray-100 p-4 rounded text-sm">
+                        "Create a Node.js e-commerce API with PostgreSQL database, Redis cache for sessions, Stripe payment integration, auto-scaling for 1000 concurrent users, monitoring with Prometheus, and CI/CD pipeline."
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-40">
+        <div class="bg-white rounded-xl p-8 text-center">
+            <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <h3 class="text-xl font-semibold mb-2">Generating Infrastructure...</h3>
+            <p class="text-gray-600" id="loadingMessage">Analyzing your requirements with AI...</p>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Global variables
+        let currentRequestId = null;
+        let websocket = null;
+        let loadingMessages = [
+            "Analyzing your requirements with AI...",
+            "Selecting optimal architecture patterns...",
+            "Generating Terraform configurations...",
+            "Creating Kubernetes manifests...",
+            "Setting up monitoring and alerting...",
+            "Finalizing CI/CD pipelines...",
+            "Almost ready! 🚀"
+        ];
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+            loadRecentRequests();
+            setupWebSocket();
+            startTypewriterEffect();
+            checkSystemStatus();
+        });
+
+        function initializeApp() {
+            const form = document.getElementById('infraForm');
+            form.addEventListener('submit', handleFormSubmit);
+
+            // Auto-save form data
+            const inputs = form.querySelectorAll('input, textarea, select');
+            inputs.forEach(input => {
+                input.addEventListener('change', saveFormData);
+            });
+
+            // Load saved form data
+            loadFormData();
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+
+            const formData = new FormData(e.target);
+            const data = {
+                description: formData.get('description'),
+                environment: formData.get('environment'),
+                priority: formData.get('priority'),
+                options: {
+                    cloudProvider: formData.get('cloudProvider'),
+                    includeMonitoring: formData.has('includeMonitoring'),
+                    includeCI: formData.has('includeCI'),
+                    includeSecurity: formData.has('includeSecurity')
+                }
+            };
+
+            if (!data.description.trim()) {
+                alert('Please provide a description of your infrastructure needs.');
+                return;
+            }
+
+            generateInfrastructure(data);
+        }
+
+        async function generateInfrastructure(data) {
+            showLoading();
+            startLoadingAnimation();
+
+            try {
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-API-Key': 'web-interface'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                currentRequestId = result.requestId;
+
+                // Start polling for status if WebSocket is not available
+                if (!websocket || websocket.readyState !== WebSocket.OPEN) {
+                    pollStatus(result.requestId);
+                }
+
+            } catch (error) {
+                hideLoading();
+                showError('Failed to generate infrastructure: ' + error.message);
+            }
+        }
+
+        function setupWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws`;
+
+            try {
+                websocket = new WebSocket(wsUrl);
+
+                websocket.onopen = function() {
+                    console.log('WebSocket connected');
+                    updateSystemStatus('online');
+                };
+
+                websocket.onmessage = function(event) {
+                    const data = JSON.parse(event.data);
+                    handleWebSocketMessage(data);
+                };
+
+                websocket.onclose = function() {
+                    console.log('WebSocket disconnected');
+                    updateSystemStatus('offline');
+
+                    // Attempt to reconnect after 5 seconds
+                    setTimeout(setupWebSocket, 5000);
+                };
+
+                websocket.onerror = function(error) {
+                    console.error('WebSocket error:', error);
+                    updateSystemStatus('error');
+                };
+
+            } catch (error) {
+                console.error('Failed to setup WebSocket:', error);
+                updateSystemStatus('error');
+            }
+        }
+
+        function handleWebSocketMessage(data) {
+            switch (data.type) {
+                case 'status_update':
+                    if (data.requestId === currentRequestId) {
+                        updateRequestStatus(data.status);
+                    }
+                    break;
+
+                case 'connected':
+                    console.log('Connected to Text2IaC API');
+                    break;
+
+                case 'error':
+                    console.error('WebSocket error:', data.message);
+                    break;
+            }
+        }
+
+        function updateRequestStatus(status) {
+            if (status.status === 'completed') {
+                hideLoading();
+                showResult(status);
+            } else if (status.status === 'failed') {
+                hideLoading();
+                showError(status.message || 'Infrastructure generation failed');
+            } else {
+                updateLoadingMessage(status.message || 'Processing...');
+            }
+        }
+
+        async function pollStatus(requestId) {
+            const maxAttempts = 60; // 5 minutes with 5-second intervals
+            let attempts = 0;
+
+            const poll = async () => {
+                try {
+                    const response = await fetch(`/api/generate/${requestId}`);
+                    if (response.ok) {
+                        const status = await response.json();
+                        updateRequestStatus(status);
+
+                        if (status.status === 'completed' || status.status === 'failed') {
+                            return;
+                        }
+                    }
+
+                    attempts++;
+                    if (attempts < maxAttempts) {
+                        setTimeout(poll, 5000);
+                    } else {
+                        hideLoading();
+                        showError('Request timeout. Please check status manually.');
+                    }
+
+                } catch (error) {
+                    console.error('Error polling status:', error);
+                    hideLoading();
+                    showError('Failed to get request status');
+                }
+            };
+
+            poll();
+        }
+
+        function showResult(result) {
+            const resultSection = document.getElementById('resultSection');
+            const resultCard = document.getElementById('resultCard');
+
+            const statusClass = result.status === 'completed' ? 'status-completed' :
+                               result.status === 'failed' ? 'status-failed' : 'status-processing';
+
+            resultCard.innerHTML = `
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-2xl font-bold text-gray-800">🎉 Infrastructure Generated!</h3>
+                        <span class="px-4 py-2 rounded-full text-white text-sm font-semibold ${statusClass}">
+                            ${result.status.toUpperCase()}
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <h4 class="font-semibold mb-2">📋 Service Details</h4>
+                            <ul class="space-y-1 text-sm text-gray-600">
+                                <li><strong>Name:</strong> ${result.name}</li>
+                                <li><strong>Environment:</strong> ${result.environment}</li>
+                                <li><strong>Request ID:</strong> ${result.requestId}</li>
+                                <li><strong>Estimated Cost:</strong> ${result.estimated_cost || 'N/A'}</li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h4 class="font-semibold mb-2">🔧 Components</h4>
+                            <div class="flex flex-wrap gap-2">
+                                ${(result.components || []).map(comp =>
+                                    `<span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">${comp}</span>`
+                                ).join('')}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        ${result.urls ? Object.entries(result.urls).map(([key, url]) => `
+                            <a href="${url}" target="_blank" class="block p-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-center rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all">
+                                <div class="text-sm font-medium">${key.replace('_', ' ').replace('url', '').trim()}</div>
+                                <div class="text-xs opacity-75">View →</div>
+                            </a>
+                        `).join('') : ''}
+                    </div>
+
+                    ${result.next_steps ? `
+                        <div class="mb-6">
+                            <h4 class="font-semibold mb-3">📝 Next Steps</h4>
+                            <ol class="list-decimal list-inside space-y-1 text-sm text-gray-600">
+                                ${result.next_steps.map(step => `<li>${step}</li>`).join('')}
+                            </ol>
+                        </div>
+                    ` : ''}
+
+                    ${result.mermaid_diagram ? `
+                        <div class="border-t pt-6">
+                            <h4 class="font-semibold mb-3">🏗️ Architecture Diagram</h4>
+                            <div class="bg-gray-50 p-4 rounded-lg overflow-x-auto">
+                                <pre class="text-sm text-gray-700">${result.mermaid_diagram}</pre>
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+
+            resultSection.classList.remove('hidden');
+            resultSection.scrollIntoView({ behavior: 'smooth' });
+
+            // Add to recent requests
+            addToRecentRequests(result);
+        }
+
+        function showError(message) {
+            const resultSection = document.getElementById('resultSection');
+            const resultCard = document.getElementById('resultCard');
+
+            resultCard.innerHTML = `
+                <div class="text-center">
+                    <div class="text-6xl mb-4">❌</div>
+                    <h3 class="text-2xl font-bold text-red-600 mb-4">Generation Failed</h3>
+                    <p class="text-gray-600 mb-6">${message}</p>
+                    <button onclick="hideResult()" class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-all">
+                        Try Again
+                    </button>
+                </div>
+            `;
+
+            resultSection.classList.remove('hidden');
+            resultSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function hideResult() {
+            document.getElementById('resultSection').classList.add('hidden');
+        }
+
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            document.getElementById('loadingOverlay').classList.add('flex');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+            document.getElementById('loadingOverlay').classList.remove('flex');
+        }
+
+        function startLoadingAnimation() {
+            let messageIndex = 0;
+            const loadingMessage = document.getElementById('loadingMessage');
+
+            const updateMessage = () => {
+                if (messageIndex < loadingMessages.length) {
+                    loadingMessage.textContent = loadingMessages[messageIndex];
+                    messageIndex++;
+                    setTimeout(updateMessage, 3000);
+                }
+            };
+
+            updateMessage();
+        }
+
+        function updateLoadingMessage(message) {
+            const loadingMessage = document.getElementById('loadingMessage');
+            if (loadingMessage) {
+                loadingMessage.textContent = message;
+            }
+        }
+
+        function useTemplate(type) {
+            const templates = {
+                blog: "Create a WordPress blog with user comments system, admin dashboard, automatic backups, CDN integration, and SEO optimization. Expected 1000 daily visitors.",
+
+                ecommerce: "Build a complete e-commerce store with product catalog, shopping cart, payment processing (Stripe), inventory management, customer analytics, and order tracking. Expected 500 orders per day.",
+
+                api: "Create a scalable REST API with user authentication (JWT), PostgreSQL database, Redis caching, rate limiting, comprehensive monitoring, and auto-scaling. Expected 10k requests per hour.",
+
+                mobile: "Build a mobile app backend with user registration, push notifications, file uploads, real-time messaging, analytics tracking, and offline sync capabilities.",
+
+                analytics: "Create an analytics platform with data ingestion pipeline, real-time stream processing, interactive dashboards, automated reporting, and machine learning insights.",
+
+                ml: "Build a machine learning platform with model training pipeline, inference API, experiment tracking, model versioning, and automated retraining system."
+            };
+
+            document.getElementById('description').value = templates[type];
+            document.getElementById('description').focus();
+        }
+
+        function showHelp() {
+            document.getElementById('helpModal').classList.remove('hidden');
+            document.getElementById('helpModal').classList.add('flex');
+        }
+
+        function hideHelp() {
+            document.getElementById('helpModal').classList.add('hidden');
+            document.getElementById('helpModal').classList.remove('flex');
+        }
+
+        function saveFormData() {
+            const form = document.getElementById('infraForm');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+            localStorage.setItem('text2iac_form_data', JSON.stringify(data));
+        }
+
+        function loadFormData() {
+            const saved = localStorage.getItem('text2iac_form_data');
+            if (saved) {
+                const data = JSON.parse(saved);
+                Object.entries(data).forEach(([key, value]) => {
+                    const element = document.querySelector(`[name="${key}"]`);
+                    if (element) {
+                        if (element.type === 'checkbox') {
+                            element.checked = value === 'on';
+                        } else {
+                            element.value = value;
+                        }
+                    }
+                });
+            }
+        }
+
+        async function loadRecentRequests() {
+            // Mock recent requests for now
+            const recentRequests = [
+                {
+                    name: "E-commerce API",
+                    requestor: "john.doe@company.com",
+                    status: "completed",
+                    timestamp: "2025-01-15T10:30:00Z",
+                    source: "web"
+                },
+                {
+                    name: "Analytics Dashboard",
+                    requestor: "jane.smith@company.com",
+                    status: "processing",
+                    timestamp: "2025-01-15T09:15:00Z",
+                    source: "email"
+                }
+            ];
+
+            const container = document.getElementById('recentRequests');
+            container.innerHTML = recentRequests.map(req => `
+                <div class="bg-white rounded-lg shadow-md p-4 flex items-center justify-between">
+                    <div>
+                        <h4 class="font-semibold">${req.name}</h4>
+                        <p class="text-sm text-gray-600">by ${req.requestor} via ${req.source}</p>
+                        <p class="text-xs text-gray-500">${new Date(req.timestamp).toLocaleDateString()}</p>
+                    </div>
+                    <div>
+                        <span class="px-3 py-1 rounded-full text-sm ${
+                            req.status === 'completed' ? 'bg-green-100 text-green-800' :
+                            req.status === 'processing' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-red-100 text-red-800'
+                        }">
+                            ${req.status === 'completed' ? '✅' : req.status === 'processing' ? '⏳' : '❌'} ${req.status}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addToRecentRequests(result) {
+            // Add new request to the beginning of recent requests
+            const container = document.getElementById('recentRequests');
+            const newRequest = `
+                <div class="bg-white rounded-lg shadow-md p-4 flex items-center justify-between animation-fadeIn">
+                    <div>
+                        <h4 class="font-semibold">${result.name}</h4>
+                        <p class="text-sm text-gray-600">by you via web</p>
+                        <p class="text-xs text-gray-500">Just now</p>
+                    </div>
+                    <div>
+                        <span class="px-3 py-1 rounded-full text-sm bg-green-100 text-green-800">
+                            ✅ ${result.status}
+                        </span>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('afterbegin', newRequest);
+        }
+
+        function startTypewriterEffect() {
+            const words = ['Plain English', 'Natural Language', 'Simple Descriptions', 'Your Ideas'];
+            const typewriter = document.getElementById('typewriter');
+            let wordIndex = 0;
+            let charIndex = 0;
+            let isDeleting = false;
+
+            function type() {
+                const currentWord = words[wordIndex];
+
+                if (isDeleting) {
+                    typewriter.textContent = currentWord.substring(0, charIndex - 1);
+                    charIndex--;
+                } else {
+                    typewriter.textContent = currentWord.substring(0, charIndex + 1);
+                    charIndex++;
+                }
+
+                if (!isDeleting && charIndex === currentWord.length) {
+                    setTimeout(() => isDeleting = true, 2000);
+                } else if (isDeleting && charIndex === 0) {
+                    isDeleting = false;
+                    wordIndex = (wordIndex + 1) % words.length;
+                }
+
+                const speed = isDeleting ? 50 : 100;
+                setTimeout(type, speed);
+            }
+
+            type();
+        }
+
+        async function checkSystemStatus() {
+            try {
+                const response = await fetch('/health');
+                const status = await response.json();
+                updateSystemStatus(response.ok ? 'online' : 'error');
+            } catch (error) {
+                updateSystemStatus('error');
+            }
+        }
+
+        function updateSystemStatus(status) {
+            const indicator = document.getElementById('status-indicator');
+            const text = document.getElementById('status-text');
+
+            switch (status) {
+                case 'online':
+                    indicator.className = 'inline-block w-2 h-2 bg-green-400 rounded-full mr-2';
+                    text.textContent = 'System Online';
+                    break;
+                case 'offline':
+                    indicator.className = 'inline-block w-2 h-2 bg-yellow-400 rounded-full mr-2';
+                    text.textContent = 'Connecting...';
+                    break;
+                case 'error':
+                    indicator.className = 'inline-block w-2 h-2 bg-red-400 rounded-full mr-2';
+                    text.textContent = 'System Error';
+                    break;
+            }
+        }
+
+        // Health check endpoint for load balancer
+        if (window.location.pathname === '/health.html') {
+            document.body.innerHTML = '<div style="text-align:center;padding:50px;"><h1>OK</h1><p>Frontend healthy</p></div>';
+        }
+    </script>
+</body>
+</html>
