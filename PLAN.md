@@ -96,6 +96,3 @@ No-code platforms pozwalają budować aplikacje bez kodowania - Bubble, Glide, M
 3. **Standards-Based** - Zapier/Slack/Teams są industry standards
 4. **Zero Training** - familiar interfaces, natural language input
 
-**Bottom Line**: Email + Zapier daje 80% korzyści w 20% czasu i kosztu. Perfect dla quick wins i validation przed inwestycją w advanced features.
-
-Czy chcesz, żebym pokazał konkretną implementację Email + Zapier integration z przykładowymi konfiguracjami?

@@ -67,3 +67,20 @@ clean:
 	find . -name "dist" -type d -prune -exec rm -rf '{}' +
 	find . -name "build" -type d -prune -exec rm -rf '{}' +
 	find . -name "coverage" -type d -prune -exec rm -rf '{}' +
+
+
+
+
+# Build and push git changes
+push:
+	./scripts/build.sh
+	git add .
+	git commit -m "[auto] Update at $(date '+%Y-%m-%d %H:%M:%S')"
+	git push
+
+# Publish to Docker registry
+publish:
+	docker-compose build
+	docker-compose push
+
+
