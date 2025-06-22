@@ -1,0 +1,197 @@
+# Text2IaC Prometheus Configuration
+# This configuration sets up monitoring for the Text2IaC platform
+
+global:
+  scrape_interval: 15s  # Default scrape interval
+  evaluation_interval: 15s  # Evaluate rules every 15 seconds
+  scrape_timeout: 10s
+  external_labels:
+    monitor: 'text2iac-monitor'
+
+# Alert manager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['alertmanager:9093']
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+  - 'alert.rules'
+  # - 'second.rules'
+
+# Scrape configurations for services
+scrape_configs:
+  # Self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    metrics_path: /metrics
+    scheme: http
+
+  # Node Exporter
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    metrics_path: /metrics
+    scheme: http
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: '([^:]+)(?::\d+)?'
+        target_label: instance
+        replacement: '${1}'
+
+  # Docker Daemon
+  - job_name: 'docker'
+    static_configs:
+      - targets: ['docker:9323']
+    metrics_path: /metrics
+    scheme: http
+
+  # cAdvisor
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+    metrics_path: /metrics
+    scheme: http
+    relabel_configs:
+      - source_labels: [__name__]
+        regex: '(container_tasks_state|container_memory_failures_total)'.*
+        action: drop
+
+  # API Service
+  - job_name: 'text2iac-api'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['api:8000']
+    scheme: http
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox:9115
+
+  # Frontend Service
+  - job_name: 'text2iac-frontend'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['frontend:3000']
+    scheme: http
+
+  # Database Metrics
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres:9187']
+    metrics_path: /metrics
+    scheme: http
+
+  # Redis Metrics
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:9121']
+    metrics_path: /metrics
+    scheme: http
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+
+  # Blackbox Exporter
+  - job_name: 'blackbox-http'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+        - 'http://frontend:3000'     # Frontend health check
+        - 'http://api:8000/health'   # API health check
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox:9115
+
+  # Pushgateway
+  - job_name: 'pushgateway'
+    honor_labels: true
+    static_configs:
+      - targets: ['pushgateway:9091']
+
+# Remote write configuration (for Thanos, Cortex, etc.)
+remote_write:
+  - url: 'http://thanos-receive:19291/api/v1/receive'
+    queue_config:
+      max_samples_per_send: 10000
+      capacity: 20000
+      max_shards: 30
+
+# Remote read configuration
+remote_read:
+  - url: 'http://thanos-query:10904/api/v1/read'
+    read_recent: true
+
+# Alert rules
+alert:
+  # Alert for any instance that is unreachable for > 5 minutes.
+  - alert: InstanceDown
+    expr: up == 0
+    for: 5m
+    labels:
+      severity: page
+    annotations:
+      summary: "Instance {{ $labels.instance }} down"
+      description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 5 minutes."
+
+  # Alert for high memory usage
+  - alert: HighMemoryUsage
+    expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 90
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High memory usage on {{ $labels.instance }}"
+      description: "Memory usage is {{ $value }}%"
+
+  # Alert for high CPU usage
+  - alert: HighCpuUsage
+    expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100 > 80
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High CPU usage on {{ $labels.instance }}"
+      description: "CPU usage is {{ $value }}%"
+
+  # Alert for high disk usage
+  - alert: HighDiskUsage
+    expr: 100 - (node_filesystem_avail_bytes{mountpoint="/",fstype!="rootfs"} * 100 / node_filesystem_size_bytes{mountpoint="/",fstype!="rootfs"}) > 85
+    for: 15m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High disk usage on {{ $labels.instance }}"
+      description: "Disk usage is {{ $value }}%"
+
+# Service discovery configurations
+# Kubernetes SD configs for running in Kubernetes
+# Uncomment and configure if running in Kubernetes
+# - job_name: 'kubernetes-apiservers'
+#   kubernetes_sd_configs:
+#     - role: endpoints
+#   scheme: https
+#   tls_config:
+#     ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+#     # Skip verification for testing. In production, use proper certificates
+#     insecure_skip_verify: true
+#   bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+#   relabel_configs:
+#     - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+#       action: keep
+#       regex: default;kubernetes;https
+
+# File-based service discovery
+# file_sd_configs:
+#   - files:
+#     - 'targets/*.json'

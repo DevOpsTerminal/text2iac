@@ -1,0 +1,941 @@
+# Text2IaC - Terraform Prompt Template
+
+## Terraform Configuration Guidelines
+
+When generating Terraform configurations, please adhere to the following guidelines:
+
+### 1. Code Structure
+- Use consistent indentation (2 spaces)
+- Organize resources into logical modules
+- Use meaningful resource names that describe their purpose
+- Group related resources together
+- Use variables for configurable values
+- Include descriptions for variables and outputs
+
+### 2. Best Practices
+- Enable state locking
+- Use remote state with proper access controls
+- Implement proper state organization (workspaces or directory structure)
+- Use data sources instead of hardcoded values when possible
+- Implement proper error handling and validation
+
+### 3. Security
+- Never include sensitive values in code
+- Use environment variables or secret managers for secrets
+- Implement least privilege IAM policies
+- Enable encryption at rest and in transit
+- Use private networking where possible
+
+### 4. Reliability
+- Implement proper error handling
+- Use lifecycle rules to prevent accidental deletion
+- Implement proper backup and retention policies
+- Use health checks and monitoring
+
+### 5. Cost Optimization
+- Use appropriate instance types
+- Implement auto-scaling
+- Use spot instances when appropriate
+- Clean up unused resources
+- Implement budget alerts
+
+## Example Module Structure
+
+```
+modules/
+  ├── vpc/
+  │   ├── main.tf
+  │   ├── variables.tf
+  │   └── outputs.tf
+  ├── ecs/
+  │   ├── main.tf
+  │   ├── variables.tf
+  │   └── outputs.tf
+  └── rds/
+      ├── main.tf
+      ├── variables.tf
+      └── outputs.tf
+```
+
+## Example Variable Usage
+
+```hcl
+variable "environment" {
+  description = "The deployment environment (e.g., dev, staging, prod)"
+  type        = string
+  default     = "dev"
+}
+
+variable "instance_type" {
+  description = "The EC2 instance type"
+  type        = string
+  default     = "t3.micro"
+}
+
+variable "tags" {
+  description = "A map of tags to apply to all resources"
+  type        = map(string)
+  default     = {}
+}
+```
+
+## Example Resource with Best Practices
+
+```hcl
+# Security group with descriptive name and tags
+resource "aws_security_group" "web_server" {
+  name_prefix = "web-server-sg-"
+  description = "Security group for web servers"
+  vpc_id      = var.vpc_id
+
+  # Allow HTTP/HTTPS from anywhere
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow HTTP access"
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow HTTPS access"
+  }
+
+  # Allow all outbound traffic
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow all outbound traffic"
+  }
+
+  tags = merge(
+    var.tags,
+    {
+      Name        = "${var.environment}-web-server-sg"
+      Environment = var.environment
+      ManagedBy   = "Terraform"
+    }
+  )
+
+  # Prevent destruction of the security group if it has dependencies
+  lifecycle {
+    create_before_destroy = true
+    prevent_destroy       = false
+  }
+}
+
+# Output useful information
+output "security_group_id" {
+  description = "The ID of the security group"
+  value       = aws_security_group.web_server.id
+}
+
+output "security_group_arn" {
+  description = "The ARN of the security group"
+  value       = aws_security_group.web_server.arn
+}
+```
+
+## State Management Example
+
+```hcl
+# Configure the backend to use S3 with state locking via DynamoDB
+terraform {
+  backend "s3" {
+    bucket         = "my-terraform-state-bucket"
+    key            = "production/terraform.tfstate"
+    region         = "us-west-2"
+    encrypt        = true
+    dynamodb_table = "terraform-locks"
+    
+    # Enable state locking
+    dynamodb_table_name = "terraform-locks"
+  }
+
+  # Require minimum Terraform version
+  required_version = ">= 1.0.0"
+  
+  # Required providers and their versions
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.0"
+    }
+  }
+}
+```
+
+## Workspace Example
+
+```hcl
+# Use workspaces for environment separation
+locals {
+  environment = terraform.workspace
+  
+  # Environment-specific configurations
+  env_configs = {
+    dev = {
+      instance_type = "t3.micro"
+      instance_count = 1
+    }
+    staging = {
+      instance_type = "t3.medium"
+      instance_count = 2
+    }
+    production = {
+      instance_type = "t3.large"
+      instance_count = 3
+    }
+  }
+  
+  # Merge with default config
+  config = merge(
+    {
+      instance_type = "t3.micro"
+      instance_count = 1
+    },
+    lookup(local.env_configs, local.environment, {})
+  )
+}
+
+# Use the configuration
+resource "aws_instance" "example" {
+  count         = local.config.instance_count
+  ami           = data.aws_ami.ubuntu.id
+  instance_type = local.config.instance_type
+  
+  tags = {
+    Name        = "${local.environment}-instance-${count.index + 1}"
+    Environment = local.environment
+  }
+}
+```
+
+## Provider Configuration
+
+```hcl
+# Configure the AWS Provider
+provider "aws" {
+  region = var.aws_region
+  
+  # Assume role for cross-account access
+  assume_role {
+    role_arn = var.assume_role_arn
+  }
+  
+  # Set the default tags for all resources
+  default_tags {
+    tags = merge(
+      var.tags,
+      {
+        Environment = var.environment
+        ManagedBy   = "Terraform"
+        Repository  = "https://github.com/your-org/your-repo"
+      }
+    )
+  }
+}
+
+# Additional provider configuration for a different region
+provider "aws" {
+  alias  = "us_east_1"
+  region = "us-east-1"
+}
+```
+
+## Data Sources Example
+
+```hcl
+# Get the latest Ubuntu AMI
+data "aws_ami" "ubuntu" {
+  most_recent = true
+  owners      = ["099720109477"] # Canonical
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
+
+# Get the default VPC
+data "aws_vpc" "default" {
+  default = true
+}
+
+# Get availability zones
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+```
+
+## Dynamic Blocks Example
+
+```hcl
+# Create security group with dynamic ingress rules
+resource "aws_security_group" "example" {
+  name_prefix = "example-sg-"
+  vpc_id      = var.vpc_id
+
+  # Dynamic block for ingress rules
+  dynamic "ingress" {
+    for_each = var.ingress_rules
+    
+    content {
+      from_port   = ingress.value.port
+      to_port     = ingress.value.port
+      protocol    = ingress.value.protocol
+      cidr_blocks = ingress.value.cidr_blocks
+      description = ingress.value.description
+    }
+  }
+}
+
+# Variable for dynamic ingress rules
+variable "ingress_rules" {
+  description = "List of ingress rules to create"
+  type = list(object({
+    port        = number
+    protocol    = string
+    cidr_blocks = list(string)
+    description = string
+  }))
+  
+  default = [
+    {
+      port        = 80
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow HTTP access"
+    },
+    {
+      port        = 443
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow HTTPS access"
+    }
+  ]
+}
+```
+
+## Modules Example
+
+```hcl
+# Example module usage
+module "vpc" {
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "~> 3.0"
+  
+  name = "${var.environment}-vpc"
+  cidr = var.vpc_cidr
+  
+  azs             = ["${var.region}a", "${var.region}b", "${var.region}c"]
+  private_subnets = var.private_subnets
+  public_subnets  = var.public_subnets
+  
+  enable_nat_gateway = true
+  single_nat_gateway  = true
+  
+  tags = merge(
+    var.tags,
+    {
+      Environment = var.environment
+      Terraform   = "true"
+    }
+  )
+}
+
+# Output values from the module
+output "vpc_id" {
+  description = "The ID of the VPC"
+  value       = module.vpc.vpc_id
+}
+
+output "private_subnets" {
+  description = "List of private subnet IDs"
+  value       = module.vpc.private_subnets
+}
+
+output "public_subnets" {
+  description = "List of public subnet IDs"
+  value       = module.vpc.public_subnets
+}
+```
+
+## Workspace-Specific Configurations
+
+```hcl
+# Workspace-specific variables
+locals {
+  # Default configuration
+  config = {
+    environment = terraform.workspace
+    region      = var.region
+    
+    # Default instance configuration
+    instance_type = "t3.micro"
+    instance_count = 1
+    
+    # Default tags
+    tags = {
+      Environment = terraform.workspace
+      ManagedBy   = "Terraform"
+    }
+  }
+  
+  # Environment-specific overrides
+  env_config = {
+    dev = {
+      instance_type = "t3.micro"
+      instance_count = 1
+    }
+    staging = {
+      instance_type = "t3.medium"
+      instance_count = 2
+    }
+    production = {
+      instance_type = "t3.large"
+      instance_count = 3
+    }
+  }
+  
+  # Merge configurations
+  merged_config = merge(
+    local.config,
+    lookup(local.env_config, local.config.environment, {})
+  )
+}
+
+# Use the merged configuration
+resource "aws_instance" "example" {
+  count         = local.merged_config.instance_count
+  ami           = data.aws_ami.ubuntu.id
+  instance_type = local.merged_config.instance_type
+  
+  tags = merge(
+    local.merged_config.tags,
+    {
+      Name = "${local.merged_config.environment}-instance-${count.index + 1}"
+    }
+  )
+}
+```
+
+## Remote State Data Source
+
+```hcl
+# Read remote state from another Terraform configuration
+data "terraform_remote_state" "vpc" {
+  backend = "s3"
+  
+  config = {
+    bucket = "my-terraform-state-bucket"
+    key    = "vpc/terraform.tfstate"
+    region = "us-west-2"
+  }
+}
+
+# Use the remote state data
+resource "aws_instance" "example" {
+  # ... other configuration ...
+  
+  subnet_id = data.terraform_remote_state.vpc.outputs.public_subnets[0]
+  
+  vpc_security_group_ids = [
+    aws_security_group.instance.id,
+    data.terraform_remote_state.vpc.outputs.default_security_group_id
+  ]
+}
+```
+
+## Conditional Expressions
+
+```hcl
+# Conditional resource creation
+resource "aws_instance" "example" {
+  count = var.create_instance ? 1 : 0
+  
+  ami           = var.ami_id
+  instance_type = var.instance_type
+  
+  # ... other configuration ...
+}
+
+# Conditional attribute
+resource "aws_instance" "example" {
+  ami           = var.ami_id
+  instance_type = var.instance_type
+  
+  # Only assign public IP if in public subnet
+  associate_public_ip_address = var.subnet_type == "public" ? true : false
+  
+  # ... other configuration ...
+}
+
+# Conditional dynamic block
+dynamic "ebs_block_device" {
+  for_each = var.enable_ebs_encryption ? [1] : []
+  
+  content {
+    device_name = "/dev/sdf"
+    volume_size = 100
+    volume_type = "gp3"
+    encrypted   = true
+    kms_key_id  = aws_kms_key.ebs.arn
+  }
+}
+```
+
+## Error Handling and Validation
+
+```hcl
+# Variable validation
+variable "environment" {
+  description = "The deployment environment"
+  type        = string
+  
+  validation {
+    condition     = contains(["dev", "staging", "production"], var.environment)
+    error_message = "The environment must be one of: dev, staging, production."
+  }
+}
+
+# Precondition check
+resource "aws_instance" "example" {
+  # ... other configuration ...
+  
+  lifecycle {
+    # Ensure the AMI is owned by the correct account
+    precondition {
+      condition     = data.aws_ami.example.owner_id == "123456789012"
+      error_message = "The AMI must be owned by account 123456789012."
+    }
+    
+    # Ensure the instance type is appropriate
+    precondition {
+      condition     = contains(["t3.micro", "t3.small", "t3.medium"], var.instance_type)
+      error_message = "The instance type must be t3.micro, t3.small, or t3.medium."
+    }
+  }
+}
+
+# Postcondition check
+resource "aws_instance" "example" {
+  # ... other configuration ...
+  
+  lifecycle {
+    postcondition {
+      condition     = self.private_ip != ""
+      error_message = "The instance must have a private IP address."
+    }
+  }
+}
+```
+
+## Workspace-Specific Outputs
+
+```hcl
+# Conditional output based on workspace
+output "instance_public_ip" {
+  description = "The public IP address of the instance"
+  value       = var.environment == "production" ? null : aws_instance.example.public_ip
+}
+
+# Output a map of instance IDs by AZ
+output "instance_ids_by_az" {
+  description = "A map of availability zones to instance IDs"
+  value = {
+    for idx, instance in aws_instance.example : 
+    element(data.aws_availability_zones.available.names, idx) => instance.id
+  }
+}
+
+# Output a formatted string
+output "connection_string" {
+  description = "Connection string for the database"
+  value       = format(
+    "postgresql://%s:%s@%s:%d/%s",
+    var.db_username,
+    var.db_password,
+    aws_db_instance.example.address,
+    aws_db_instance.example.port,
+    var.db_name
+  )
+  sensitive = true
+}
+```
+
+## Terraform Cloud/Enterprise Integration
+
+```hcl
+# Configure Terraform Cloud backend
+terraform {
+  cloud {
+    organization = "example-org"
+    
+    workspaces {
+      name = "production"
+    }
+  }
+  
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.0"
+    }
+  }
+}
+
+# Use TFC variables for sensitive data
+variable "aws_access_key" {
+  type      = string
+  sensitive = true
+}
+
+variable "aws_secret_key" {
+  type      = string
+  sensitive = true
+}
+
+provider "aws" {
+  region     = var.aws_region
+  access_key = var.aws_access_key
+  secret_key = var.aws_secret_key
+}
+```
+
+## Sentinel Policies (Terraform Cloud/Enterprise)
+
+```python
+# sentinel/policies/restrict-ec2-instance-types.sentinel
+import "tfplan"
+
+# Allowed instance types
+allowed_types = [
+  "t3.nano",
+  "t3.micro",
+  "t3.small",
+  "t3.medium",
+]
+
+# Get all AWS instances
+instances = tfplan.resources.aws_instance
+
+# Main rule
+main = rule {
+  all instances as _, instances_changes {
+    all instances_changes as index, rc {
+      rc.applied.instance_type in allowed_types
+    }
+  }
+}
+```
+
+## Terraform Cloud/Enterprise Workspace Configuration
+
+```hcl
+# Example of configuring Terraform Cloud workspaces using the tfe provider
+provider "tfe" {
+  hostname = var.tfe_hostname
+  token    = var.tfe_token
+}
+
+# Create a workspace
+resource "tfe_workspace" "production" {
+  name              = "production"
+  organization     = var.tfe_organization
+  auto_apply       = false
+  queue_all_runs   = false
+  working_directory = "terraform/production"
+  
+  vcs_repo {
+    identifier     = "example-org/terraform-repo"
+    oauth_token_id = var.vcs_oauth_token_id
+  }
+  
+  # Workspace variables
+  variable_set_ids = [
+    tfe_variable_set.security.id,
+    tfe_variable_set.aws_credentials.id
+  ]
+}
+
+# Create a variable set
+resource "tfe_variable_set" "security" {
+  name          = "Security Variables"
+  description   = "Security-related variables"
+  organization  = var.tfe_organization
+  global        = false
+  
+  # Assign to workspaces
+  workspace_ids = [tfe_workspace.production.id]
+}
+
+# Add variables to the set
+resource "tfe_variable" "aws_access_key" {
+  key             = "AWS_ACCESS_KEY_ID"
+  value           = var.aws_access_key
+  category        = "env"
+  sensitive       = true
+  description     = "AWS Access Key"
+  variable_set_id = tfe_variable_set.security.id
+}
+
+resource "tfe_variable" "aws_secret_key" {
+  key             = "AWS_SECRET_ACCESS_KEY"
+  value           = var.aws_secret_key
+  category        = "env"
+  sensitive       = true
+  description     = "AWS Secret Key"
+  variable_set_id = tfe_variable_set.security.id
+}
+```
+
+## Terraform Cloud/Enterprise Run Triggers
+
+```hcl
+# Create a run trigger between workspaces
+resource "tfe_run_trigger" "network_infrastructure" {
+  workspace_id  = tfe_workspace.application.id
+  sourceable_id = tfe_workspace.network_infrastructure.id
+}
+
+# Example of using outputs from another workspace
+data "tfe_outputs" "network" {
+  organization = var.tfe_organization
+  workspace    = "network-infrastructure"
+}
+
+# Use the outputs in your configuration
+resource "aws_instance" "example" {
+  # ... other configuration ...
+  
+  subnet_id = data.tfe_outputs.network.values.public_subnet_ids[0]
+  
+  vpc_security_group_ids = [
+    data.tfe_outputs.network.values.security_group_id
+  ]
+}
+```
+
+## Sentinel Mock Generation
+
+```hcl
+# Generate Sentinel mocks for testing
+module "sentinel_mocks" {
+  source  = "hashicorp/sentinel/test"
+  version = "0.1.0"
+  
+  # Path to the Terraform configuration
+  config_path = path.module
+  
+  # Generate mocks for specific workspaces
+  workspace_name = "production"
+  
+  # Include plan and state
+  include_plan  = true
+  include_state = true
+  
+  # Output directory for mocks
+  output_dir = "${path.module}/mocks"
+}
+```
+
+## Terraform Cloud/Enterprise Policy Sets
+
+```hcl
+# Create a policy set
+resource "tfe_policy_set" "security" {
+  name          = "security-policies"
+  description   = "Organization-wide security policies"
+  organization  = var.tfe_organization
+  global        = true  # Apply to all workspaces
+  
+  # Link to a VCS repository
+  vcs_repo {
+    identifier         = "example-org/terraform-sentinel-policies"
+    branch             = "main"
+    ingress_submodules = false
+    oauth_token_id     = var.vcs_oauth_token_id
+  }
+  
+  # Or use a local directory
+  # policies_path = "sentinel/policies"
+}
+
+# Create a policy set parameter
+resource "tfe_policy_set_parameter" "allowed_instance_types" {
+  key            = "allowed_instance_types"
+  value          = jsonencode(["t3.micro", "t3.small", "t3.medium"])
+  policy_set_id  = tfe_policy_set.security.id
+}
+```
+
+## Terraform Cloud/Enterprise Team Access
+
+```hcl
+# Create a team
+resource "tfe_team" "devops" {
+  name         = "devops"
+  organization = var.tfe_organization
+}
+
+# Grant team access to a workspace
+resource "tfe_team_access" "devops_production" {
+  access       = "write"
+  team_id      = tfe_team.devops.id
+  workspace_id = tfe_workspace.production.id
+}
+
+# Add team members
+resource "tfe_team_member" "alice" {
+  team_id  = tfe_team.devops.id
+  username = "alice@example.com"
+}
+
+resource "tfe_team_member" "bob" {
+  team_id  = tfe_team.devops.id
+  username = "bob@example.com"
+}
+```
+
+## Terraform Cloud/Enterprise Notification Configurations
+
+```hcl
+# Create a notification configuration
+resource "tfe_notification_configuration" "slack" {
+  name         = "slack-notifications"
+  enabled      = true
+  workspace_id = tfe_workspace.production.id
+  
+  # Slack webhook URL
+  url = var.slack_webhook_url
+  
+  # Trigger for all run events
+  triggers = [
+    "run:needs_attention",
+    "run:applying",
+    "run:completed",
+    "run:errored"
+  ]
+  
+  # Customize the notification message
+  destination_type = "slack"
+}
+```
+
+## Terraform Cloud/Enterprise Run Tasks
+
+```hcl
+# Register a run task
+resource "tfe_registry_module" "example" {
+  vcs_repo {
+    display_identifier = "example-org/terraform-aws-vpc"
+    identifier         = "example-org/terraform-aws-vpc"
+    oauth_token_id     = var.vcs_oauth_token_id
+  }
+}
+
+# Create a run task
+resource "tfe_run_task" "security_scan" {
+  name        = "security-scan"
+  url         = "https://security-scanner.example.com/trigger"
+  description = "Runs security scans on Terraform plans"
+  enabled     = true
+  
+  # Optional HMAC key for webhook authentication
+  hmac_key = var.security_scan_hmac_key
+}
+
+# Attach the run task to a workspace
+resource "tfe_workspace_run_task" "security_scan" {
+  workspace_id      = tfe_workspace.production.id
+  task_id           = tfe_run_task.security_scan.id
+  enforcement_level = "advisory"  # or "mandatory"
+  
+  # Optional stage to run the task in
+  stage = "pre_plan"
+}
+```
+
+## Terraform Cloud/Enterprise Agent Pools
+
+```hcl
+# Create an agent pool
+resource "tfe_agent_pool" "aws" {
+  name         = "aws-agents"
+  organization = var.tfe_organization
+}
+
+# Create an agent token
+resource "tfe_agent_token" "aws" {
+  agent_pool_id = tfe_agent_pool.aws.id
+  description   = "Token for AWS agents"
+}
+
+# Configure a workspace to use the agent pool
+resource "tfe_workspace" "production" {
+  # ... other configuration ...
+  
+  execution_mode = "agent"
+  agent_pool_id  = tfe_agent_pool.aws.id
+}
+
+# Output the agent token (only shown once)
+output "agent_token" {
+  value     = tfe_agent_token.aws.token
+  sensitive = true
+}
+```
+
+## Terraform Cloud/Enterprise Variable Sets
+
+```hcl
+# Create a variable set for AWS credentials
+resource "tfe_variable_set" "aws_credentials" {
+  name         = "aws-credentials"
+  description  = "AWS credentials for all workspaces"
+  organization = var.tfe_organization
+  global       = true  # Apply to all workspaces
+}
+
+# Add AWS credentials to the variable set
+resource "tfe_variable" "aws_access_key" {
+  key             = "AWS_ACCESS_KEY_ID"
+  value           = var.aws_access_key
+  category        = "env"
+  sensitive       = true
+  description     = "AWS Access Key"
+  variable_set_id = tfe_variable_set.aws_credentials.id
+}
+
+resource "tfe_variable" "aws_secret_key" {
+  key             = "AWS_SECRET_ACCESS_KEY"
+  value           = var.aws_secret_key
+  category        = "env"
+  sensitive       = true
+  description     = "AWS Secret Key"
+  variable_set_id = tfe_variable_set.aws_credentials.id
+}
+
+# Add a region variable
+resource "tfe_variable" "aws_region" {
+  key             = "AWS_REGION"
+  value           = "us-west-2"
+  category        = "env"
+  description     = "AWS Region"
+  variable_set_id = tfe_variable_set.aws_credentials.id
+}
+```
+
+This comprehensive Terraform prompt template ensures that all generated configurations follow best practices, are secure, and are well-structured for production use.

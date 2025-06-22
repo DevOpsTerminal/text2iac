@@ -1,4 +1,3 @@
-```yaml
 # docker-compose.yml - Text2IaC Platform Main Orchestration
 version: '3.8'
 
@@ -97,7 +96,8 @@ networks:
     ipam:
       config:
         - subnet: 172.20.0.0/16
-``` CORE API SERVICE
+  # =============================================================================
+  # CORE API SERVICE
   # =============================================================================
   api:
     build: 
@@ -276,6 +276,3 @@ networks:
       interval: 10s
       timeout: 3s
       retries: 3
-
-  # =============================================================================
-  #
