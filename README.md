@@ -1,670 +1,391 @@
-# text2iac
-Text to Infrastrucutre as Code
-# Text2IaC: Integracja z Email i Chat - Rozwiązania dla Wszystkich
+# Text2IaC Platform 🚀
 
-## 🎯 Proste Rozwiązanie (REKOMENDOWANE): Email + Slack/Teams/Telegram
+> Generate production-ready infrastructure from plain English descriptions
 
-### Koncepcja
-Wykorzystanie standardowych komunikatorów z prostą integracją przez Zapier/Make.com - zero kodowania, gotowe w 30 minut.
+[![Build Status](https://github.com/devopsterminal/text2iac-platform/workflows/CI/badge.svg)](https://github.com/devopsterminal/text2iac-platform/actions)
+[![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://hub.docker.com/r/devopsterminal/text2iac)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-### Architektura
+## 🎯 What is Text2IaC?
+
+Text2IaC transforms natural language descriptions into production-ready infrastructure code. Simply describe what you need in plain English, and get:
+
+- **Terraform modules** for cloud infrastructure
+- **Docker Compose** files for local development
+- **Kubernetes manifests** for container orchestration
+- **Monitoring setup** with Prometheus/Grafana
+- **CI/CD pipelines** with GitHub Actions
+
+## ✨ Key Features
+
+- 📧 **Email Integration** - Send requests via email
+- 🌐 **Web Interface** - User-friendly dashboard
+- 🤖 **AI-Powered** - Uses Mistral 7B locally via Ollama
+- 🔒 **Fully Local** - No external dependencies or data sharing
+- ⚡ **Fast Setup** - Running in 5 minutes
+- 🎨 **Template-Based** - Reusable, tested patterns
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Docker & Docker Compose
+- 8GB RAM (for LLM)
+- 20GB disk space
+
+### 1. Clone and Start
+```bash
+git clone https://github.com/devopsterminal/text2iac-platform.git
+cd text2iac-platform
+
+# Copy environment template
+cp .env.example .env
+
+# Start all services
+make start
 ```
-Email/Slack/Teams/Telegram → Zapier → Text2IaC API → Generated Infrastructure
-        ↓                      ↓           ↓              ↓
-   Natural Text             Parser     LLM Engine      Backstage
-   Request                 + Router    + Templates     + ArgoCD
+
+### 2. Wait for LLM Download (first time)
+```bash
+# Monitor Ollama logs
+docker-compose logs -f ollama
+
+# Should see: "Mistral 7B model loaded successfully"
 ```
 
-### Implementacja
-
-#### 1. **Email Integration (Najprostsze)**
-```yaml
-# Gmail → Text2IaC Integration
-automation_workflow:
-  trigger: "New email to infrastructure@company.com"
-  filter: "Subject contains: [TEXT2IAC]"
-  
-  actions:
-    - parse_email_body
-    - send_to_text2iac_api
-    - create_backstage_service
-    - reply_with_status_link
+### 3. Test via Email
+```bash
+# Send test email (if SMTP configured)
+echo "Create a Node.js API with PostgreSQL database" | \
+  mail -s "[TEXT2IAC] Test API" infrastructure@localhost
 ```
 
-**Przykład użycia:**
-```
-To: infrastructure@company.com
-Subject: [TEXT2IAC] E-commerce API Request
+### 4. Test via Web Interface
+```bash
+# Open web interface
+open http://localhost:8080
 
-Create a Node.js e-commerce API with:
+# Or manually navigate to http://localhost:8080
+```
+
+## 📖 Usage Examples
+
+### Example 1: Simple Web API
+```
+Subject: [TEXT2IAC] User Management API
+
+Create a Node.js REST API with:
 - User authentication (JWT)
-- Product catalog (PostgreSQL)
-- Payment integration (Stripe)
-- Auto-scaling (Kubernetes)
-- Monitoring (Prometheus)
+- PostgreSQL database
+- Redis caching
+- Auto-scaling setup
+- Basic monitoring
 
-Expected traffic: 1000 req/min
+Expected traffic: 1000 requests/hour
 Environment: Production
-Timeline: ASAP
 ```
 
-**Auto-response:**
+**Generated Output:**
+- ✅ Terraform AWS infrastructure
+- ✅ Docker Compose for local dev
+- ✅ Kubernetes manifests
+- ✅ Monitoring dashboard
+- ✅ CI/CD pipeline
+
+### Example 2: E-commerce Platform
 ```
-✅ Request received: E-commerce API
-🔗 Track progress: https://backstage.company.com/services/ecommerce-api
-⏱️ ETA: 15 minutes for infrastructure generation
-📋 Status: Processing with Mistral 7B...
-
-Your infrastructure will include:
-- AWS EKS cluster
-- RDS PostgreSQL
-- ElastiCache Redis
-- Application Load Balancer
-- CloudWatch monitoring
-```
-
-#### 2. **Slack Integration**
-```typescript
-// Slack Bot Configuration
-const slackBotConfig = {
-  app_token: process.env.SLACK_APP_TOKEN,
-  bot_token: process.env.SLACK_BOT_TOKEN,
-  
-  shortcuts: {
-    "create_service": {
-      callback_id: "text2iac_modal",
-      title: "🚀 Create Infrastructure",
-      description: "Generate infrastructure from text"
-    }
-  },
-  
-  slash_commands: {
-    "/infra": "Quick infrastructure generation",
-    "/service": "Create new service",
-    "/status": "Check deployment status"
-  }
-};
-
-// Slack Workflow Example
-const slackWorkflow = {
-  name: "Infrastructure Request",
-  steps: [
-    {
-      type: "form",
-      fields: [
-        {
-          name: "description",
-          type: "textarea",
-          label: "Describe your infrastructure needs",
-          placeholder: "Create a microservice with database and monitoring..."
-        },
-        {
-          name: "environment",
-          type: "select",
-          options: ["development", "staging", "production"]
-        },
-        {
-          name: "urgency",
-          type: "select", 
-          options: ["low", "medium", "high", "critical"]
-        }
-      ]
-    },
-    {
-      type: "webhook",
-      url: "https://text2iac.company.com/api/generate",
-      method: "POST"
-    },
-    {
-      type: "message",
-      channel: "#infrastructure",
-      template: "✅ Infrastructure request submitted by {{user}}"
-    }
-  ]
-};
+Build an e-commerce platform with:
+- Product catalog (Elasticsearch)
+- Shopping cart (Redis)
+- Payment processing (Stripe integration)
+- Order management (PostgreSQL)
+- Admin dashboard
+- Real-time analytics
 ```
 
-#### 3. **Microsoft Teams Integration**
-```json
-{
-  "composeExtensions": [
-    {
-      "botId": "text2iac-bot",
-      "commands": [
-        {
-          "id": "createInfrastructure",
-          "title": "Create Infrastructure",
-          "description": "Generate infrastructure from text description",
-          "parameters": [
-            {
-              "name": "description",
-              "title": "Infrastructure Description",
-              "description": "Describe what you need"
-            }
-          ]
-        }
-      ]
-    }
-  ],
-  "bots": [
-    {
-      "botId": "text2iac-bot",
-      "commandLists": [
-        {
-          "scopes": ["team", "personal"],
-          "commands": [
-            {
-              "title": "/infra",
-              "description": "Quick infrastructure generation"
-            },
-            {
-              "title": "/status", 
-              "description": "Check deployment status"
-            }
-          ]
-        }
-      ]
-    }
-  ]
-}
+**Generated Output:**
+- ✅ Microservices architecture
+- ✅ API Gateway setup
+- ✅ Database migrations
+- ✅ Load balancer configuration
+- ✅ Security best practices
+
+## 🏗️ Architecture
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│     Email       │────│   Text2IaC      │────│   Generated     │
+│   Integration   │    │   API Server    │    │  Infrastructure │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Web Interface │────│   Mistral 7B    │────│   Templates     │
+│   Dashboard     │    │   (via Ollama)  │    │   & Examples    │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
-#### 4. **Telegram Integration**
-```python
-# Telegram Bot Commands
-telegram_bot_commands = [
-    {
-        "command": "/start",
-        "description": "Start Text2IaC assistant"
-    },
-    {
-        "command": "/create",
-        "description": "Create new infrastructure"
-    },
-    {
-        "command": "/status",
-        "description": "Check deployment status"
-    },
-    {
-        "command": "/help",
-        "description": "Show available commands"
-    }
-]
+## 📡 Integration Options
 
-# Telegram Workflow
-async def handle_message(update, context):
-    message = update.message.text
-    
-    if message.startswith('/create'):
-        # Show inline keyboard for quick options
-        keyboard = [
-            [InlineKeyboardButton("🌐 Web API", callback_data='web_api')],
-            [InlineKeyboardButton("📊 Analytics Platform", callback_data='analytics')],
-            [InlineKeyboardButton("🛒 E-commerce", callback_data='ecommerce')],
-            [InlineKeyboardButton("✍️ Custom Description", callback_data='custom')]
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        
-        await update.message.reply_text(
-            "What type of infrastructure do you need?",
-            reply_markup=reply_markup
-        )
-    
-    elif not message.startswith('/'):
-        # Direct text processing
-        await process_infrastructure_request(update, message)
+### 1. Email Integration
+Send infrastructure requests to `infrastructure@yourcompany.com`:
+
+```
+To: infrastructure@yourcompany.com
+Subject: [TEXT2IAC] Project Name
+
+Describe your infrastructure needs in plain English...
 ```
 
-## 🛠️ No-Code/Low-Code Integration Platform
+### 2. Web Interface
+Access the web dashboard at `http://localhost:8080`:
+- 📝 Text input form
+- 🎯 Template gallery
+- 📊 Status tracking
+- 📋 Request history
 
-### Wykorzystanie Zapier/Make.com/Integrately
-Zapier umożliwia łączenie Slack, Telegram, Email z API bez kodowania - ponad 5000 dostępnych integracji
+### 3. API Endpoints
+Direct API access for programmatic use:
 
-#### **Zapier Workflow Configuration**
-```yaml
-name: "Text2IaC Multi-Channel Integration"
-
-triggers:
-  - platform: gmail
-    filter: "to:infrastructure@company.com"
-  
-  - platform: slack
-    channel: "#infrastructure-requests"
-    filter: "message contains: @text2iac"
-    
-  - platform: telegram
-    bot: "@text2iac_bot"
-    command: "/create"
-    
-  - platform: teams
-    mention: "@Text2IaC"
-
-actions:
-  1. parse_request:
-      service: "text-parser-api"
-      extract: ["description", "environment", "urgency"]
-      
-  2. generate_infrastructure:
-      service: "text2iac-api"
-      endpoint: "/api/generate"
-      method: "POST"
-      
-  3. create_backstage_entry:
-      service: "backstage-api"
-      endpoint: "/api/catalog/entities"
-      
-  4. deploy_via_argocd:
-      service: "argocd-api"
-      endpoint: "/api/v1/applications"
-      
-  5. notify_requestor:
-      platforms: ["original_channel"]
-      template: "Infrastructure ready: {{backstage_link}}"
-```
-
-### **Make.com Scenario (Visual Workflow)**
-```
-[Gmail Trigger] → [Text Parser] → [HTTP Request to Text2IaC]
-        ↓                ↓               ↓
-[Filter by Subject] → [Data Mapper] → [Backstage Creator]
-        ↓                ↓               ↓
-[Slack Notification] ← [Status Checker] ← [ArgoCD Deployer]
-```
-
-## 📱 Solutions for Non-Technical Users
-
-### 1. **Web Portal (No-Code Required)**
-No-code platformy pozwalają nietechnicznym użytkownikom tworzyć aplikacje bez kodowania - Bubble, Microsoft Power Apps, Glide
-
-#### **Simple Web Interface (Built with Bubble/Softr)**
-```html
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Text2IaC - Infrastructure Generator</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-</head>
-<body class="bg-gray-50">
-    <div class="container mx-auto px-4 py-8">
-        <h1 class="text-3xl font-bold text-center mb-8">🚀 Infrastructure Generator</h1>
-        
-        <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
-            <form id="infraForm">
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">
-                        What do you want to build? (Describe in plain English)
-                    </label>
-                    <textarea 
-                        id="description"
-                        class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
-                        rows="5"
-                        placeholder="Example: I need a blog website with user comments, admin panel, and email notifications. Expected 500 visitors per day."
-                    ></textarea>
-                </div>
-                
-                <div class="grid grid-cols-2 gap-4 mb-4">
-                    <div>
-                        <label class="block text-gray-700 text-sm font-bold mb-2">Environment</label>
-                        <select id="environment" class="w-full px-3 py-2 border rounded-lg">
-                            <option value="development">Development (Testing)</option>
-                            <option value="staging">Staging (Pre-production)</option>
-                            <option value="production">Production (Live)</option>
-                        </select>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-gray-700 text-sm font-bold mb-2">Priority</label>
-                        <select id="priority" class="w-full px-3 py-2 border rounded-lg">
-                            <option value="low">Low (Within a week)</option>
-                            <option value="medium">Medium (Within 3 days)</option>
-                            <option value="high">High (Within 24 hours)</option>
-                            <option value="critical">Critical (ASAP)</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <button 
-                    type="submit"
-                    class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-200"
-                >
-                    ✨ Generate Infrastructure
-                </button>
-            </form>
-            
-            <div id="result" class="mt-6 hidden">
-                <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-                    <h3 class="text-green-800 font-bold mb-2">🎉 Infrastructure Created!</h3>
-                    <p class="text-green-700 mb-3" id="resultMessage"></p>
-                    <div class="space-y-2">
-                        <a href="#" id="backstageLink" class="block text-blue-600 hover:underline">
-                            📊 View in Backstage Dashboard
-                        </a>
-                        <a href="#" id="statusLink" class="block text-blue-600 hover:underline">
-                            ⚡ Check Deployment Status
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Quick Templates -->
-        <div class="max-w-4xl mx-auto mt-12">
-            <h2 class="text-2xl font-bold text-center mb-6">🎯 Quick Templates</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-white rounded-lg shadow-md p-4 cursor-pointer hover:shadow-lg transition duration-200" onclick="useTemplate('blog')">
-                    <h3 class="font-bold mb-2">📝 Blog Website</h3>
-                    <p class="text-sm text-gray-600">WordPress with comments, admin panel, and CDN</p>
-                </div>
-                
-                <div class="bg-white rounded-lg shadow-md p-4 cursor-pointer hover:shadow-lg transition duration-200" onclick="useTemplate('ecommerce')">
-                    <h3 class="font-bold mb-2">🛒 E-commerce Store</h3>
-                    <p class="text-sm text-gray-600">Online store with payments, inventory, and analytics</p>
-                </div>
-                
-                <div class="bg-white rounded-lg shadow-md p-4 cursor-pointer hover:shadow-lg transition duration-200" onclick="useTemplate('api')">
-                    <h3 class="font-bold mb-2">🔌 REST API</h3>
-                    <p class="text-sm text-gray-600">Scalable API with database, auth, and monitoring</p>
-                </div>
-                
-                <div class="bg-white rounded-lg shadow-md p-4 cursor-pointer hover:shadow-lg transition duration-200" onclick="useTemplate('mobile')">
-                    <h3 class="font-bold mb-2">📱 Mobile App Backend</h3>
-                    <p class="text-sm text-gray-600">Backend for iOS/Android with push notifications</p>
-                </div>
-                
-                <div class="bg-white rounded-lg shadow-md p-4 cursor-pointer hover:shadow-lg transition duration-200" onclick="useTemplate('analytics')">
-                    <h3 class="font-bold mb-2">📊 Analytics Dashboard</h3>
-                    <p class="text-sm text-gray-600">Data pipeline with real-time visualizations</p>
-                </div>
-                
-                <div class="bg-white rounded-lg shadow-md p-4 cursor-pointer hover:shadow-lg transition duration-200" onclick="useTemplate('iot')">
-                    <h3 class="font-bold mb-2">🌐 IoT Platform</h3>
-                    <p class="text-sm text-gray-600">Device management with time-series database</p>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <script>
-        // JavaScript for form handling and templates
-        function useTemplate(type) {
-            const templates = {
-                blog: "Create a WordPress blog with user comments, admin dashboard, automatic backups, and global CDN. Expected 1000 daily visitors.",
-                ecommerce: "Build an e-commerce store with product catalog, shopping cart, payment processing (Stripe), inventory management, and customer analytics. Expected 500 orders per day.",
-                api: "Create a REST API with user authentication, PostgreSQL database, Redis caching, rate limiting, and comprehensive monitoring. Expected 10k requests per hour.",
-                mobile: "Build a mobile app backend with user registration, push notifications, file uploads, real-time messaging, and analytics tracking.",
-                analytics: "Create an analytics dashboard with data ingestion pipeline, real-time processing, interactive charts, and automated reporting.",
-                iot: "Build an IoT platform with device management, time-series data storage, real-time alerts, and monitoring dashboard for 1000+ devices."
-            };
-            
-            document.getElementById('description').value = templates[type];
-        }
-        
-        document.getElementById('infraForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const description = document.getElementById('description').value;
-            const environment = document.getElementById('environment').value;
-            const priority = document.getElementById('priority').value;
-            
-            // Show loading state
-            const button = e.target.querySelector('button');
-            button.innerHTML = '⏳ Generating...';
-            button.disabled = true;
-            
-            try {
-                // Call Text2IaC API
-                const response = await fetch('/api/generate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ description, environment, priority })
-                });
-                
-                const result = await response.json();
-                
-                // Show success message
-                document.getElementById('resultMessage').textContent = 
-                    `Infrastructure "${result.name}" has been created and is deploying to ${environment}.`;
-                document.getElementById('backstageLink').href = result.backstage_url;
-                document.getElementById('statusLink').href = result.status_url;
-                document.getElementById('result').classList.remove('hidden');
-                
-            } catch (error) {
-                alert('Error generating infrastructure. Please try again.');
-            } finally {
-                button.innerHTML = '✨ Generate Infrastructure';
-                button.disabled = false;
-            }
-        });
-    </script>
-</body>
-</html>
-```
-
-### 2. **Mobile App (No-Code Built with Glide/Adalo)**
-
-#### **App Structure**
-```yaml
-app_config:
-  name: "Text2IaC Mobile"
-  platform: "Progressive Web App"
-  
-  screens:
-    home:
-      title: "Infrastructure Generator"
-      components:
-        - text_input: "Describe your needs"
-        - template_gallery: "Quick options"
-        - submit_button: "Generate"
-        
-    templates:
-      title: "Choose Template"
-      components:
-        - list_view: "Popular templates"
-        - search_bar: "Find specific type"
-        
-    status:
-      title: "Deployment Status"
-      components:
-        - progress_indicator: "Real-time updates"
-        - links: "Backstage & monitoring"
-        
-    history:
-      title: "My Infrastructure"
-      components:
-        - grid_view: "Past requests"
-        - filter_options: "By status/date"
-
-  integrations:
-    - zapier_webhook: "Submit to Text2IaC API"
-    - push_notifications: "Status updates"
-    - deep_links: "Open Backstage"
-```
-
-### 3. **Voice Integration (Future Enhancement)**
-
-#### **Alexa/Google Assistant Skills**
-```json
-{
-  "alexa_skill": {
-    "invocation": "text to infrastructure",
-    "intents": [
-      {
-        "name": "CreateInfrastructure",
-        "slots": [
-          {
-            "name": "Description",
-            "type": "AMAZON.SearchQuery"
-          },
-          {
-            "name": "Environment", 
-            "type": "Environment"
-          }
-        ],
-        "samples": [
-          "Create a {Description} for {Environment}",
-          "I need {Description}",
-          "Build me {Description}"
-        ]
-      }
-    ]
-  },
-  
-  "google_assistant_action": {
-    "name": "Infrastructure Generator",
-    "invocation": "Talk to Infrastructure Generator",
-    "conversations": [
-      {
-        "trigger": "create infrastructure",
-        "response": "What kind of infrastructure do you need?",
-        "follow_up": "collect_description"
-      }
-    ]
-  }
-}
-```
-
-## 📊 Integration Architecture Overview
-
-### **Multi-Channel Hub**
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    COMMUNICATION CHANNELS                      │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌────────┐ │
-│  │    Email    │  │    Slack    │  │   Teams     │  │Telegram│ │
-│  │   Gmail     │  │  Channels   │  │   Bot       │  │  Bot   │ │
-│  └─────────────┘  └─────────────┘  └─────────────┘  └────────┘ │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-┌─────────────────────────────────────────────────────────────────┐
-│                    INTEGRATION LAYER                           │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌────────┐ │
-│  │   Zapier    │  │  Make.com   │  │ Integrately │  │ Custom │ │
-│  │ Workflows   │  │ Scenarios   │  │ Automations │  │  API   │ │
-│  └─────────────┘  └─────────────┘  └─────────────┘  └────────┘ │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-┌─────────────────────────────────────────────────────────────────┐
-│                      TEXT2IAC CORE                             │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌────────┐ │
-│  │   Parser    │  │ LLM Engine  │  │  Template   │  │ Deploy │ │
-│  │   Service   │  │ Mistral 7B  │  │  Generator  │  │ Engine │ │
-│  └─────────────┘  └─────────────┘  └─────────────┘  └────────┘ │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-┌─────────────────────────────────────────────────────────────────┐
-│                    OUTPUT CHANNELS                             │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌────────┐ │
-│  │  Backstage  │  │   ArgoCD    │  │  Grafana    │  │ GitHub │ │
-│  │   Portal    │  │   Status    │  │ Monitoring  │  │ Issues │ │
-│  └─────────────┘  └─────────────┘  └─────────────┘  └────────┘ │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-## 🎯 Comparative Analysis
-
-### **Rozwiązanie A: Simple Integration (Email + Zapier)**
-
-#### **Pros:**
-- ✅ **Setup: 30 minut** vs inne: 2-4 tygodnie
-- ✅ **Zero coding** - konfiguracja przez UI
-- ✅ **Universal** - każdy ma email
-- ✅ **Cost: $20/month** (Zapier Pro)
-
-#### **Cons:**
-- ❌ Mniej interaktywne niż chat
-- ❌ Async communication tylko
-- ❌ Ograniczone formatting options
-
-#### **Best For:**
-- Mały zespół (5-20 osób)
-- Formal request process
-- Dokumentacja wymagana
-
-### **Rozwiązanie B: Multi-Chat Integration**
-
-#### **Pros:**
-- ✅ **Real-time** collaboration
-- ✅ **Rich formatting** - buttons, cards, etc.
-- ✅ **Team context** - discussions in channels
-- ✅ **Mobile native** - notifications
-
-#### **Cons:**
-- ❌ Multiple platforms do maintain
-- ❌ Training required per platform
-- ❌ Więcej moving parts
-
-#### **Best For:**
-- Średni/duży zespół (20-100+ osób)
-- Agile development culture
-- Technical teams
-
-### **Rozwiązanie C: No-Code Web Portal**
-
-#### **Pros:**
-- ✅ **User-friendly** GUI
-- ✅ **Template gallery** - guided experience
-- ✅ **Progress tracking** built-in
-- ✅ **Mobile responsive**
-
-#### **Cons:**
-- ❌ Another tool to remember
-- ❌ Requires hosting
-- ❌ Less integrated with workflow
-
-#### **Best For:**
-- Mixed technical/non-technical teams
-- Self-service culture
-- External stakeholders access
-
-## 🏆 **REKOMENDACJA: Progressive Implementation**
-
-### **Phase 1: Email Foundation (Week 1)**
 ```bash
-# Quick setup:
-1. Create infrastructure@company.com
-2. Setup Zapier Gmail → Text2IaC integration
-3. Configure auto-responses with status links
-4. Test with team
+# Generate infrastructure
+curl -X POST http://localhost:3001/api/generate \
+  -H "Content-Type: application/json" \
+  -d '{"description": "Create a blog with comments", "environment": "production"}'
 
-Cost: $20/month
-Time: 2 hours setup
+# Check status
+curl http://localhost:3001/api/status/{request_id}
 ```
 
-### **Phase 2: Slack Enhancement (Week 2-3)**
+## 🛠️ Configuration
+
+### Environment Variables
 ```bash
-# Add interactive features:
-1. Install Text2IaC Slack app
-2. Add slash commands (/infra, /status)
-3. Create #infrastructure-requests channel
-4. Setup notifications
+# Core Settings
+OLLAMA_MODEL=mistral:7b
+API_PORT=3001
+WEB_PORT=8080
 
-Cost: +$0 (Slack bot)
-Time: 4 hours setup
+# Email Configuration (optional)
+SMTP_HOST=mail.company.com
+SMTP_USER=infrastructure@company.com
+SMTP_PASS=your-password
+IMAP_HOST=mail.company.com
+
+# Database
+DB_HOST=postgres
+DB_NAME=text2iac
+DB_USER=text2iac
+DB_PASS=secure-password
+
+# Security
+JWT_SECRET=your-jwt-secret
+API_KEY=your-api-key
 ```
 
-### **Phase 3: Multi-Platform (Month 2)**
+### Email Setup (Optional)
+If you want email integration, configure SMTP/IMAP:
+
+1. **Gmail/Google Workspace:**
+   ```bash
+   SMTP_HOST=smtp.gmail.com
+   IMAP_HOST=imap.gmail.com
+   SMTP_USER=infrastructure@company.com
+   SMTP_PASS=app-specific-password
+   ```
+
+2. **Microsoft Exchange:**
+   ```bash
+   SMTP_HOST=smtp.office365.com
+   IMAP_HOST=outlook.office365.com
+   ```
+
+3. **Internal Mail Server:**
+   ```bash
+   SMTP_HOST=mail.company.internal
+   IMAP_HOST=mail.company.internal
+   ```
+
+## 📊 Monitoring & Health Checks
+
+### Service Status
 ```bash
-# Scale to other platforms:
-1. Teams bot deployment
-2. Telegram integration
-3. Mobile PWA launch
-4. Advanced workflows
+# Check all services
+make health-check
 
-Cost: +$50/month
-Time: 1 week implementation
+# Individual service health
+curl http://localhost:3001/health    # API Server
+curl http://localhost:8080/health    # Web Interface
+curl http://localhost:11434/api/ps   # Ollama LLM
 ```
 
-**Dlaczego progressive approach?**
-- Start simple, add complexity gradually
-- Learn user preferences before investing
-- Validate ROI at each step
-- Minimize change management shock
+### Logs
+```bash
+# View all logs
+docker-compose logs -f
 
-**Key success metrics:**
-- 80% of requests via integrated channels (vs manual)
-- 50% reduction in infrastructure request time
-- 90% user satisfaction with simplicity
-- Zero training required for basic usage
+# Specific service logs
+docker-compose logs -f api
+docker-compose logs -f email-bridge
+docker-compose logs -f ollama
+```
 
-**This approach ensures maximum adoption with minimum friction - perfect for both technical and non-technical users.**
+### Metrics
+- 📈 **Request metrics**: `http://localhost:3001/metrics`
+- 🔧 **System metrics**: `http://localhost:9090` (if Prometheus enabled)
+- 📊 **Dashboards**: `http://localhost:3000` (if Grafana enabled)
+
+## 🔧 Development
+
+### Local Development
+```bash
+# Start in development mode
+make dev
+
+# Run tests
+make test
+
+# Code formatting
+make format
+
+# Type checking
+make lint
+```
+
+### Adding New Templates
+1. Create template in `templates/` directory
+2. Add to template registry in `api/src/services/template.service.ts`
+3. Test with example request
+4. Update documentation
+
+### Custom Prompts
+Modify LLM prompts in `config/prompts/`:
+- `system-prompt.txt` - Base instructions for LLM
+- `terraform-prompt.txt` - Terraform-specific guidance
+- `kubernetes-prompt.txt` - Kubernetes-specific guidance
+
+## 🚢 Deployment
+
+### Docker Compose (Recommended)
+```bash
+# Production deployment
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+# With monitoring stack
+docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
+```
+
+### Kubernetes
+```bash
+# Apply manifests
+kubectl apply -f k8s/
+
+# Check status
+kubectl get pods -n text2iac
+```
+
+### Cloud Deployment
+- **AWS**: Use ECS or EKS with provided configurations
+- **Azure**: Use Container Instances or AKS
+- **GCP**: Use Cloud Run or GKE
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for detailed guidelines.
+
+## 📚 Documentation
+
+- 📖 [Getting Started Guide](docs/GETTING_STARTED.md)
+- 🏗️ [Architecture Overview](docs/ARCHITECTURE.md)
+- 🔌 [API Reference](docs/API_REFERENCE.md)
+- 🚀 [Deployment Guide](docs/DEPLOYMENT.md)
+- 🎯 [Examples & Use Cases](examples/)
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+**LLM not responding:**
+```bash
+# Check Ollama status
+curl http://localhost:11434/api/ps
+
+# Restart Ollama
+docker-compose restart ollama
+```
+
+**Email not working:**
+```bash
+# Check email bridge logs
+docker-compose logs email-bridge
+
+# Test SMTP connection
+telnet $SMTP_HOST 587
+```
+
+**Web interface not loading:**
+```bash
+# Check frontend logs
+docker-compose logs frontend
+
+# Verify API connection
+curl http://localhost:3001/health
+```
+
+### Performance Tuning
+
+**For better LLM performance:**
+- Increase Docker memory limit to 12GB+
+- Use GPU if available (NVIDIA Docker runtime)
+- Consider faster models like CodeLlama 7B
+
+**For high request volume:**
+- Scale API service (`docker-compose up --scale api=3`)
+- Add Redis caching
+- Use load balancer (Nginx/HAProxy)
+
+## 📈 Roadmap
+
+### Version 1.0 (Current MVP)
+- ✅ Email integration
+- ✅ Web interface
+- ✅ Basic templates (Terraform, Docker Compose)
+- ✅ Local LLM (Mistral 7B)
+
+### Version 1.1 (Next Release)
+- 🔲 Slack/Teams integration
+- 🔲 Template gallery
+- 🔲 Request history
+- 🔲 User authentication
+
+### Version 2.0 (Future)
+- 🔲 Backstage plugin
+- 🔲 ArgoCD integration
+- 🔲 Multi-cloud support
+- 🔲 Advanced monitoring
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [Ollama](https://ollama.ai/) - Local LLM runtime
+- [Mistral AI](https://mistral.ai/) - Language model
+- [Terraform](https://terraform.io/) - Infrastructure as Code
+- [Docker](https://docker.com/) - Containerization
+
+## 📞 Support
+
+- 📧 Email: support@company.com
+- 💬 Slack: #text2iac-support
+- 🐛 Issues: [GitHub Issues](https://github.com/devopsterminal/text2iac-platform/issues)
+- 📖 Documentation: [Wiki](https://github.com/devopsterminal/text2iac-platform/wiki)
+
+---
+
+**Made with ❤️ by the Platform Engineering Team**

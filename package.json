@@ -1,0 +1,42 @@
+{
+  "name": "text2iac-platform",
+  "version": "0.1.0",
+  "description": "Text to Infrastructure as Code platform",
+  "repository": "https://github.com/DevOpsTerminal/text2iac",
+  "author": "DevOpsTerminal Team",
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "api",
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm:dev:*\"",
+    "dev:api": "cd api && npm run dev",
+    "dev:frontend": "cd frontend && npm start",
+    "build": "npm run build --workspaces",
+    "test": "npm test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0",
+    "prettier": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
