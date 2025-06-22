@@ -1,9 +1,4 @@
 # docker-compose.yml - Text2IaC Platform Main Orchestration
-version: '3.8'
-
-# =============================================================================
-# SERVICES
-# =============================================================================
 services:
   # =============================================================================
   # REVERSE PROXY (NGINX)
@@ -75,34 +70,6 @@ services:
     profiles:
       - monitoring
 
-# =============================================================================
-# VOLUMES
-# =============================================================================
-volumes:
-  postgres_data:
-    driver: local
-  redis_data:
-    driver: local
-  ollama_data:
-    driver: local
-  prometheus_data:
-    driver: local
-  grafana_data:
-    driver: local
-
-# =============================================================================
-# NETWORKS
-# =============================================================================
-networks:
-  text2iac-network:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16
-
-# =============================================================================
-# SERVICES
-# =============================================================================
   # =============================================================================
   # CORE API SERVICE
   # =============================================================================
@@ -174,7 +141,6 @@ networks:
       timeout: 10s
       retries: 3
       start_period: 30s
-    # Only start if email credentials are provided
     profiles:
       - email
 
@@ -283,3 +249,28 @@ networks:
       interval: 10s
       timeout: 3s
       retries: 3
+
+# =============================================================================
+# VOLUMES
+# =============================================================================
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  ollama_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+# =============================================================================
+# NETWORKS
+# =============================================================================
+networks:
+  text2iac-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
